@@ -1,0 +1,8 @@
+# missing ../inputs/nyc_reviews.csv
+
+# missing ../inputs/nyc_listings.csv
+
+for size reasons
+
+# sentiment analysis on 10k reviews, the whole file
+  has more than 1M lines... but my kernel crashed
