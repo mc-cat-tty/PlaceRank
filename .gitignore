@@ -161,3 +161,6 @@ cython_debug/
 
 .vscode
 .DS_Store
+
+# Ignore Whoosh index
+index
