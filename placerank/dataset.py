@@ -7,15 +7,14 @@ import os
 import csv
 import gzip
 
+LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
 
 def download_dataset_source(storage: io.StringIO) -> io.StringIO:
     """
     Download data of InsideAirbnb and unpacks it in memory.
     """
 
-    link = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
-
-    r = requests.get(link)
+    r = requests.get(LINK)
     
     if not r.ok:
         raise ConnectionError(f"Error retrieving the dataset source. Server returned status code {r.status}")
