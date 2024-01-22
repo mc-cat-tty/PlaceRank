@@ -1,12 +1,15 @@
-from whoosh.fields import Schema, ID, TEXT, KEYWORD
+from typing import Dict
+from dataclasses import Field
+from placerank.preprocessing import getDefaultAnalyzer
+from whoosh.fields import FieldType, Schema, ID, TEXT, KEYWORD
 
 class DocumentLogicView(dict):
-    SCHEMA = {
+    SCHEMA : Dict[str, FieldType] = {
         "id": ID(stored = True, unique=True),
-        "name": TEXT(stored = True),
-        "room_type": KEYWORD(stored=True, lowercase=True, scorable=True),
-        "description": TEXT,
-        "neighborhood_overview": TEXT
+        "name": TEXT(stored = True, field_boost=1.5),
+        "room_type": KEYWORD(stored=True, lowercase=True),
+        "description": TEXT(analyzer=getDefaultAnalyzer()),
+        "neighborhood_overview": TEXT(analyzer=getDefaultAnalyzer())
     }
     
     def __init__(self, record: dict):
