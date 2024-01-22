@@ -1,7 +1,7 @@
 from whoosh.fields import Schema, ID, TEXT, KEYWORD
 
 class DocumentLogicView(dict):
-    VIEW = {
+    SCHEMA = {
         "id": ID(stored = True, unique=True),
         "name": TEXT(stored = True),
         "room_type": KEYWORD(stored=True, lowercase=True, scorable=True),
@@ -14,8 +14,8 @@ class DocumentLogicView(dict):
         Extracts only the required keys from a dictionary representing a dataset record.
         The required keys are specified in the `keys` list below.
         """
-        super().__init__({k:record[k] for k in DocumentLogicView.VIEW.keys()})
+        super().__init__({k:record[k] for k in DocumentLogicView.SCHEMA.keys()})
     
     @staticmethod
     def get_schema() -> Schema:
-        return Schema(**DocumentLogicView.VIEW)
+        return Schema(**DocumentLogicView.SCHEMA)
