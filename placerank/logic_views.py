@@ -1,10 +1,10 @@
-from whoosh.fields import Schema, ID, TEXT
+from whoosh.fields import Schema, ID, TEXT, KEYWORD
 
 class DocumentLogicView(dict):
     VIEW = {
         "id": ID(stored = True, unique=True),
         "name": TEXT(stored = True),
-        "room_type": TEXT(stored=True),
+        "room_type": KEYWORD(stored=True, lowercase=True, scorable=True),
         "description": TEXT,
         "neighborhood_overview": TEXT
     }
