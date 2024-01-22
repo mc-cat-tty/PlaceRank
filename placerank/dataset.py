@@ -1,3 +1,4 @@
+from logic_views import DocumentLogicView
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.index import create_in, Index
 import requests
@@ -29,7 +30,7 @@ def download_dataset_source(storage: io.StringIO) -> io.StringIO:
 
 
 def create_index(index_dir: str) -> Index:
-    schema = Schema(id=ID, name=TEXT(stored=True), description=TEXT, neighborhood_overview=TEXT)
+    schema = DocumentLogicView.get_schema()
 
     if not os.path.exists(index_dir):
         os.mkdir(index_dir)
@@ -37,16 +38,6 @@ def create_index(index_dir: str) -> Index:
     ix = create_in(index_dir, schema)
 
     return ix
-
-
-def DocumentLogicView(document: dict):
-    """
-    Extracts only the required keys from a dictionary representing a row of the dataset.
-    The required keys are specified in the `keys` list below.
-    """
-
-    keys = ["id", "name", "description", "neighborhood_overview"]
-    return {k: document[k] for k in keys}
 
 
 def populate_index(index_dir: str):
