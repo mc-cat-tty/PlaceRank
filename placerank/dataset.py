@@ -42,17 +42,14 @@ def create_index(index_dir: str) -> Index:
 
 def populate_index(index_dir: str):
     ix = create_index(index_dir)
-    writer = ix.writer()
 
-    with io.StringIO() as storage:
+    with io.StringIO() as storage, ix.writer() as writer:
         download_dataset_source(storage)
 
         dset = csv.DictReader(storage)
 
         for row in dset:
             writer.add_document(**DocumentLogicView(row))
-
-    writer.commit()
 
     ix.close()
 
