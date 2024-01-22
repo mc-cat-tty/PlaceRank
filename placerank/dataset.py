@@ -1,4 +1,4 @@
-from logic_views import DocumentLogicView
+from placerank.logic_views import DocumentLogicView
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.index import create_in, Index
 import requests
