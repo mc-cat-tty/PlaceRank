@@ -46,7 +46,7 @@ ANALYZER_STEMMER = RegexTokenizer() | LowercaseFilter() | StopFilter() | StemFil
 ANALYZER_LEMMATIZER = RegexTokenizer() | LowercaseFilter() | LemmaFilter() | StopFilter()
 
 def getDefaultAnalyzer() -> Analyzer:
-  return ANALYZER_LEMMATIZER
+  return ANALYZER_NAIVE
 
 if __name__ == "__main__":
     nltk.download("wordnet")
