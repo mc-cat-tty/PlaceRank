@@ -54,4 +54,4 @@ if __name__ == "__main__":
 
     analyzer = getDefaultAnalyzer()
     preproc = lambda s: print(*[t.text for t in analyzer(s)], sep='\n')
-    preproc(u"This is an amazing Whoosh experience, I'm loving it")
+    preproc(u"I was walking, while a programmer was programming a program") # test passed
