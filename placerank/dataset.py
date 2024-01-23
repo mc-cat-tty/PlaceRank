@@ -1,4 +1,4 @@
-from placerank.logic_views import DocumentLogicView
+from placerank.logic_views import InsideAirbnbSchema
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.index import create_in, Index
 import requests
@@ -28,9 +28,7 @@ def download_dataset_source(storage: io.StringIO) -> io.StringIO:
     return storage
 
 
-def create_index(index_dir: str) -> Index:
-    schema = DocumentLogicView.get_schema()
-
+def create_index(index_dir: str, schema: Schema) -> Index:
     if not os.path.exists(index_dir):
         os.mkdir(index_dir)
     
@@ -40,7 +38,8 @@ def create_index(index_dir: str) -> Index:
 
 
 def populate_index(index_dir: str):
-    ix = create_index(index_dir)
+    schema = InsideAirbnbSchema()
+    ix = create_index(index_dir, schema)
 
     with io.StringIO() as storage, ix.writer() as writer:
         download_dataset_source(storage)
@@ -48,7 +47,7 @@ def populate_index(index_dir: str):
         dset = csv.DictReader(storage)
 
         for row in dset:
-            writer.add_document(**DocumentLogicView(row))
+            writer.add_document(**schema.get_document_logic_view(row))
 
     ix.close()
 
