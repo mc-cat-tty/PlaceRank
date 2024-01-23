@@ -43,10 +43,10 @@ class LemmaFilter(Filter):
 
 ANALYZER_NAIVE = RegexTokenizer() | LowercaseFilter() | StopFilter()
 ANALYZER_STEMMER = RegexTokenizer() | LowercaseFilter() | StopFilter() | StemFilter()
-ANALYZER_LEMMATIZER = RegexTokenizer() | LowercaseFilter() | LemmaFilter() | StopFilter()
+ANALYZER_LEMMATIZER = RegexTokenizer() | LowercaseFilter() | (LemmaFilter() | StopFilter())
 
 def getDefaultAnalyzer() -> Analyzer:
-  return ANALYZER_NAIVE
+  return ANALYZER_LEMMATIZER
 
 if __name__ == "__main__":
     nltk.download("wordnet")
