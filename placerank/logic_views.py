@@ -15,7 +15,7 @@ class DocumentLogicView(dict):
     def __init__(self, record: dict):
         """
         Extracts only the required keys from a dictionary representing a dataset record.
-        The required keys are specified in the `keys` list below.
+        The required keys are specified in the `SCHEMA` class field.
         """
         super().__init__({k:record[k] for k in DocumentLogicView.SCHEMA.keys()})
     

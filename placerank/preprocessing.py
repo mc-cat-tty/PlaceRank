@@ -10,7 +10,13 @@ from whoosh.analysis import *
 from typing import Generator
 from operator import attrgetter
 
+
 class LemmaFilter(Filter):
+    """
+    This class implements a lemmatization filter and %TODO: what does it do?
+    It follows the Whoosh fashion of defining preprocessing stages as filters.
+    """
+
     def __init__(self):
         self.__lemmatizerFn = nltk.WordNetLemmatizer().lemmatize
     
@@ -41,17 +47,32 @@ class LemmaFilter(Filter):
                 token.text = self.__lemmatizerFn(token.text, tag)
             yield token
 
+
 ANALYZER_NAIVE = RegexTokenizer() | LowercaseFilter() | StopFilter()
 ANALYZER_STEMMER = RegexTokenizer() | LowercaseFilter() | StopFilter() | StemFilter()
 ANALYZER_LEMMATIZER = RegexTokenizer() | LowercaseFilter() | (LemmaFilter() | StopFilter())
 
+
 def getDefaultAnalyzer() -> Analyzer:
+  """
+  Factory function to return the default corpus analyzer for the project.
+  To edit the default for the entire project, change the returned object below by selecting
+  another one (for example ANALYZER_NAIVE), or specify your own.
+
+  This function is used by :py:`~placerank.logic_views.DocumentLogicView` when defining schema
+  for the inverted index.
+  """
+
   return ANALYZER_LEMMATIZER
 
-if __name__ == "__main__":
+
+def main():
     nltk.download("wordnet")
     nltk.download('averaged_perceptron_tagger')
 
     analyzer = getDefaultAnalyzer()
     preproc = lambda s: print(*[t.text for t in analyzer(s)], sep='\n')
     preproc(u"I was walking, while a programmer was programming a program") # test passed
+
+if __name__ == "__main__":
+    main()
