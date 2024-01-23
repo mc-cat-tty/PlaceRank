@@ -13,7 +13,8 @@ from operator import attrgetter
 
 class LemmaFilter(Filter):
     """
-    This class implements a lemmatization filter and %TODO: what does it do?
+    This class implements a lemmatization filter: it normalize each token
+    to a well-defined reference thesaurus - aka WordNet
     It follows the Whoosh fashion of defining preprocessing stages as filters.
     """
 
@@ -50,7 +51,7 @@ class LemmaFilter(Filter):
 
 ANALYZER_NAIVE = RegexTokenizer() | LowercaseFilter() | StopFilter()
 ANALYZER_STEMMER = RegexTokenizer() | LowercaseFilter() | StopFilter() | StemFilter()
-ANALYZER_LEMMATIZER = RegexTokenizer() | LowercaseFilter() | (LemmaFilter() | StopFilter())
+ANALYZER_LEMMATIZER = RegexTokenizer() | LowercaseFilter() | LemmaFilter() | StopFilter()
 
 
 def getDefaultAnalyzer() -> Analyzer:
@@ -72,7 +73,7 @@ def main():
 
     analyzer = getDefaultAnalyzer()
     preproc = lambda s: print(*[t.text for t in analyzer(s)], sep='\n')
-    preproc(u"I was walking, while a programmer was programming a program") # test passed
+    preproc(u"This is an amazing Whoosh experience, I'm loving it")
 
 if __name__ == "__main__":
     main()
