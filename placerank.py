@@ -7,8 +7,9 @@ def sigint_handler(signum, frame):
     raise ExitMainLoop()
 
 def main() -> None:
+    o = Observer(lambda e, v: print(f'Searched: {v}'), [Events.SEARCH.value])
     signal.signal(signal.SIGINT, sigint_handler)
-    loop = MainLoop(SearchBar())
+    loop = MainLoop(Window(), palette=PALETTE)
     loop.run()
 
 if __name__ == "__main__":
