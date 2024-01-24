@@ -11,46 +11,46 @@ from typing import Generator
 from operator import attrgetter
 
 
-class LemmaFilter(Filter):
-    """
-    This class implements a lemmatization filter and %TODO: what does it do?
-    It follows the Whoosh fashion of defining preprocessing stages as filters.
-    """
-
-    def __init__(self):
-        self.__lemmatizerFn = nltk.WordNetLemmatizer().lemmatize
-    
-    @staticmethod
-    def to_wordnet_pos(tag: str):
-        """
-        Make treebank POS tags compliant with WordNet POS tags.
-        """
-        if tag.startswith('J'):
-            return wordnet.ADJ
-        elif tag.startswith('V'):
-            return wordnet.VERB
-        elif tag.startswith('N'):
-            return wordnet.NOUN
-        elif tag.startswith('R'):
-            return wordnet.ADV
-        else:
-            return wordnet.NOUN
-    
-    def __call__(self, tokens: Generator[Token, None, None]) -> Generator[Token, None, None]:
-        tokens = list(map(copy.copy, tokens))  # Inefficiently consumes the whole generator to have an integral view over the text field
-        tokens_text = list(map(attrgetter("text"), tokens))
-        tags = list(zip(*nltk.pos_tag(tokens_text)))[1]
-        tags_wn = map(self.to_wordnet_pos, tags)
-        
-        for token, tag in zip(tokens, tags_wn):
-            if not token.stopped:
-                token.text = self.__lemmatizerFn(token.text, tag)
-            yield token
+#class LemmaFilter(Filter):
+#    """
+#    This class implements a lemmatization filter and %TODO: what does it do?
+#    It follows the Whoosh fashion of defining preprocessing stages as filters.
+#    """
+#
+#    def __init__(self):
+#        self.__lemmatizerFn = nltk.WordNetLemmatizer().lemmatize
+#    
+#    @staticmethod
+#    def to_wordnet_pos(tag: str):
+#        """
+#        Make treebank POS tags compliant with WordNet POS tags.
+#        """
+#        if tag.startswith('J'):
+#            return wordnet.ADJ
+#        elif tag.startswith('V'):
+#            return wordnet.VERB
+#        elif tag.startswith('N'):
+#            return wordnet.NOUN
+#        elif tag.startswith('R'):
+#            return wordnet.ADV
+#        else:
+#            return wordnet.NOUN
+#    
+#    def __call__(self, tokens: Generator[Token, None, None]) -> Generator[Token, None, None]:
+#        tokens = list(map(copy.copy, tokens))  # Inefficiently consumes the whole generator to have an integral view over the text field
+#        tokens_text = list(map(attrgetter("text"), tokens))
+#        tags = list(zip(*nltk.pos_tag(tokens_text)))[1]
+#        tags_wn = map(self.to_wordnet_pos, tags)
+#        
+#        for token, tag in zip(tokens, tags_wn):
+#            if not token.stopped:
+#                token.text = self.__lemmatizerFn(token.text, tag)
+#            yield token
 
 
 ANALYZER_NAIVE = RegexTokenizer() | LowercaseFilter() | StopFilter()
 ANALYZER_STEMMER = RegexTokenizer() | LowercaseFilter() | StopFilter() | StemFilter()
-ANALYZER_LEMMATIZER = RegexTokenizer() | LowercaseFilter() | (LemmaFilter() | StopFilter())
+ANALYZER_LEMMATIZER = RegexTokenizer() | LowercaseFilter() #| (LemmaFilter() | StopFilter())
 
 
 def getDefaultAnalyzer() -> Analyzer:
