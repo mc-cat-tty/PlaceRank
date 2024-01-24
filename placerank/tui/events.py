@@ -4,21 +4,10 @@ observers. Each event holds a list of subscribers - i.e. the observers - that wi
 """
 from __future__ import annotations
 from abc import ABC, abstractmethod
-from typing import Callable, Any
+from typing import Callable, Any, List
 from weakref import WeakSet
 from enum import Enum
 
-class Broker(Enum):
-    """
-    Event broker is the aggregator under which all the events are stored
-    """
-    __instance = None
-
-    def __new__(cls, *args, **kwargs):
-        if not cls.__instance:
-            cls.__instance = super().__new__(cls, *args, **kwargs)
-        return cls.__instance
-    
 
 class Event:
     def __init__(self):
@@ -44,9 +33,19 @@ class Event:
 
 
 class Observer(ABC):
-    def __init__(self, notification_callback: Callable[[Event, Any, Any], None]):
+    def __init__(self, notification_callback: Callable[[Event, Any, Any], None], event_list: List[Event] = []):
         self.__notify_event = notification_callback
+        if event_list:
+            for e in event_list: e.register_observer(self)
     
-    @abstractmethod
     def notify_event(self, caller: Event, *args, **kwargs):
         return self.__notify_event(caller, *args, **kwargs)
+
+
+class Events(Enum):
+    """
+    `Events` is the aggregator under which all the events are stored
+    and can be retrieved with the following syntax: `Events.NAME.value`
+    """
+    SEARCH = Event()  # Search observers must listen for (event, search_text)
+
