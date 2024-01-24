@@ -38,15 +38,17 @@ class LemmaFilter(Filter):
             return wordnet.NOUN
     
     def __call__(self, tokens: Generator[Token, None, None]) -> Generator[Token, None, None]:
-        tokens = list(map(copy.copy, tokens))  # Inefficiently consumes the whole generator to have an integral view over the text field
-        tokens_text = list(map(attrgetter("text"), tokens))
-        tags = list(zip(*nltk.pos_tag(tokens_text)))[1]
-        tags_wn = map(self.to_wordnet_pos, tags)
+        tokens = [t.copy() for t in tokens]    # Consumes the whole generator
+        tokens_text = [t.text for t in tokens]
+        tags = list(zip(*nltk.pos_tag(tokens_text)))
+
+        if tags:
+            tags_wn = map(self.to_wordnet_pos, tags[1])
         
-        for token, tag in zip(tokens, tags_wn):
-            if not token.stopped:
-                token.text = self.__lemmatizerFn(token.text, tag)
-            yield token
+            for token, tag in zip(tokens, tags_wn):
+                if not token.stopped:
+                    token.text = self.__lemmatizerFn(token.text, tag)
+                yield token
 
 
 ANALYZER_NAIVE = RegexTokenizer() | LowercaseFilter() | StopFilter()
