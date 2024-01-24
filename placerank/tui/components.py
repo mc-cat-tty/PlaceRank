@@ -31,11 +31,12 @@ class SearchBar(WidgetWrap):
         self.label = Text('Textual search: ')
         self.text_field = Edit(wrap = 'clip')
         self.search_button = Button('Go', on_press = lambda btn: Events.SEARCH.value.notify(self.text_field.edit_text))
+        print(self.label.pack())
         self.search_bar = Filler(
             Columns((
-                (16, self.label),
+                (self.label.pack()[0], self.label),
                 LineBox(self.text_field, tline='', lline='', rline=''),
-                (6, self.search_button)
+                (self.search_button.pack()[0], self.search_button)
             )),
             **kwargs
         )
