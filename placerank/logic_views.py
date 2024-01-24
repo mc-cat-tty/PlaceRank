@@ -1,6 +1,6 @@
 from typing import Dict
 from dataclasses import Field
-from placerank.preprocessing import getDefaultAnalyzer
+from placerank.preprocessing import get_default_analyzer
 from whoosh.fields import FieldType, Schema, ID, TEXT, KEYWORD
 
 class DocumentLogicView(dict):
@@ -8,8 +8,8 @@ class DocumentLogicView(dict):
         "id": ID(stored = True, unique=True),
         "name": TEXT(stored = True, field_boost=1.5),
         "room_type": KEYWORD(stored=True, lowercase=True),
-        "description": TEXT(analyzer=getDefaultAnalyzer()),
-        "neighborhood_overview": TEXT(analyzer=getDefaultAnalyzer())
+        "description": TEXT(analyzer=get_default_analyzer()),
+        "neighborhood_overview": TEXT(analyzer=get_default_analyzer())
     }
     
     def __init__(self, record: dict):
