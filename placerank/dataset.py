@@ -1,6 +1,7 @@
 from placerank.logic_views import InsideAirbnbSchema
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.index import create_in, Index
+from whoosh.analysis import Analyzer
 import requests
 import io
 import os
@@ -37,8 +38,8 @@ def create_index(index_dir: str, schema: Schema) -> Index:
     return ix
 
 
-def populate_index(index_dir: str):
-    schema = InsideAirbnbSchema()
+def populate_index(index_dir: str, analyzer: Analyzer = None):
+    schema = InsideAirbnbSchema(analyzer)
     ix = create_index(index_dir, schema)
 
     with io.StringIO() as storage, ix.writer() as writer:
