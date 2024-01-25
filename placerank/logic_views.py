@@ -53,8 +53,8 @@ class DocumentLogicView(dict):
 
 class BenchmarkRecordView:
     """
-    A class which both keeps a logic representation (namely, the view) of a benchmark entry and
-    exposes some helper methods to emulate a relational database behavior on top of different
+    A class which both keeps a logic representation (namely, the view) of a benchmark queries record and
+    exposes some helper methods to emulate a relational database behavior building on top of different
     CSV files with a common primary key field.
     """
     PK = 'uin_id'
