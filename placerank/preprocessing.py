@@ -56,7 +56,7 @@ ANALYZER_STEMMER = RegexTokenizer() | LowercaseFilter() | StopFilter() | StemFil
 ANALYZER_LEMMATIZER = RegexTokenizer() | LowercaseFilter() | LemmaFilter() | StopFilter()
 
 
-def getDefaultAnalyzer() -> Analyzer:
+def get_default_analyzer() -> Analyzer:
   """
   Factory function to return the default corpus analyzer for the project.
   To edit the default for the entire project, change the returned object below by selecting
@@ -73,7 +73,7 @@ def main():
     nltk.download("wordnet")
     nltk.download('averaged_perceptron_tagger')
 
-    analyzer = getDefaultAnalyzer()
+    analyzer = get_default_analyzer()
     preproc = lambda s: print(*[t.text for t in analyzer(s)], sep='\n')
     preproc(u"This is an amazing Whoosh experience, I'm loving it")
 
