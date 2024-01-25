@@ -1,9 +1,6 @@
 from __future__ import annotations
-from operator import mul
-from tkinter import Label
-from xml.dom.minidom import Document
 from urwid import *
-from placerank.tui.events import Events
+from placerank.tui.events import *
 from placerank.logic_views import DocumentLogicView
 
 PALETTE = (
@@ -57,7 +54,7 @@ class SearchBar(WidgetWrap):
             ('pack', self.search_fields_label),
             ('weight', 75, self.search_fields_checkboxes),
             ('weight', 10, Divider()),
-            ('pack', self.search_button),
+            ('pack', AttrMap(self.search_button, None, focus_map='reversed')),
         ))
 
         self.search_bar = Filler(
@@ -79,32 +76,42 @@ class SearchArea(WidgetWrap):
     def __init__(self, **kwargs):
         self.search_bar = SearchBar()
         self.result_area = ListBox((Text('Mock'),) * 10)
-        self.search_area = Frame(
-            header = self.search_bar,
-            body = self.result_area,
-            focus_part = 'header',
+        self.search_area = Pile(
+            (('pack', self.search_bar), self.result_area),
+            focus_item = self.search_bar,
             **kwargs
         )
         WidgetWrap.__init__(self, self.search_area)
+    
+    def keypress(self, size, key):
+        if key != 'tab': return super().keypress(size, key)
+        Events.MOVE_FOCUS_TO_CONTROLS.value.notify()
 
 class Controls(WidgetWrap):
     def __init__(self, **kwargs):
-        self.advanced = Button('Advanced')
-        self.help = Button('Help')
-        self.exit = Button('Exit')
-        self.controls = Filler(
-            Columns((
+        self.advanced = Button('Advanced', on_press = self.btn_press)
+        self.help = Button('Help', on_press = self.btn_press)
+        self.exit = Button('Exit', on_press = self.btn_press)
+        self.btns = (self.advanced, self.help, self.exit)
+        self.controls = Columns((
                 ('weight', 35, Divider()),
-                ('weight', 6, self.advanced),
+                ('weight', 6, AttrMap(self.advanced, None, focus_map='reversed')),
                 ('weight', 6, Divider()),
-                ('weight', 6, self.help),
+                ('weight', 6, AttrMap(self.help, None, focus_map='reversed')),
                 ('weight', 6, Divider()),
-                ('weight', 6, self.exit),
+                ('weight', 6, AttrMap(self.exit, None, focus_map='reversed')),
                 ('weight', 35, Divider()),
-            )),
-            **kwargs
-        )
-        WidgetWrap.__init__(self, self.controls)
+        ))
+        WidgetWrap.__init__(self, Filler(self.controls, **kwargs))
+    
+    def keypress(self, size, key):
+        if key != 'tab': return super().keypress(size, key)
+        Events.MOVE_FOCUS_TO_SEARCH.value.notify()
+    
+    def btn_press(self, btn):
+        if btn == self.advanced: Events.ADVANCED_SCREEN.value.notify()
+        if btn == self.help: Events.HELP_SCREEN.value.notify()
+        if btn == self.exit: Events.EXIT_SCREEN.value.notify()
 
 class Window(WidgetWrap):
     def __init__(self):
@@ -122,4 +129,10 @@ class Window(WidgetWrap):
             footer = self.controls
         )
         self.base_container = BaseContainer(self.inner_container)
+        
+        self.inner_container_focus_change = Observer(
+            lambda e: self.inner_container.set_focus('footer' if e == Events.MOVE_FOCUS_TO_CONTROLS.value else 'body'),
+            [Events.MOVE_FOCUS_TO_CONTROLS.value, Events.MOVE_FOCUS_TO_SEARCH.value]
+        )
+
         WidgetWrap.__init__(self, self.base_container)
