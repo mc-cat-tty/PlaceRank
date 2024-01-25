@@ -95,11 +95,11 @@ class Controls(WidgetWrap):
         self.btns = (self.advanced, self.help, self.exit)
         self.controls = Columns((
                 ('weight', 35, Divider()),
-                ('weight', 6, AttrMap(self.advanced, None, focus_map='reversed')),
+                ('weight', 10, AttrMap(self.advanced, None, focus_map='reversed')),
                 ('weight', 6, Divider()),
-                ('weight', 6, AttrMap(self.help, None, focus_map='reversed')),
+                ('weight', 10, AttrMap(self.help, None, focus_map='reversed')),
                 ('weight', 6, Divider()),
-                ('weight', 6, AttrMap(self.exit, None, focus_map='reversed')),
+                ('weight', 10, AttrMap(self.exit, None, focus_map='reversed')),
                 ('weight', 35, Divider()),
         ))
         WidgetWrap.__init__(self, Filler(self.controls, **kwargs))
@@ -111,7 +111,7 @@ class Controls(WidgetWrap):
     def btn_press(self, btn):
         if btn == self.advanced: Events.ADVANCED_SCREEN.value.notify()
         if btn == self.help: Events.HELP_SCREEN.value.notify()
-        if btn == self.exit: Events.EXIT_SCREEN.value.notify()
+        if btn == self.exit: raise ExitMainLoop()
 
 class Window(WidgetWrap):
     def __init__(self):
