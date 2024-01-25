@@ -64,7 +64,7 @@ def get_default_analyzer() -> Analyzer:
   for the inverted index.
   """
 
-  return ANALYZER_LEMMATIZER
+  return ANALYZER_NAIVE
 
 
 def main():

@@ -1,15 +1,20 @@
 from __future__ import annotations
 from operator import mul
 from tkinter import Label
+from xml.dom.minidom import Document
 from urwid import *
 from placerank.tui.events import Events
+from placerank.logic_views import DocumentLogicView
 
-PALETTE = [
+PALETTE = (
     ('fg', 'black', 'light gray'),
     ('bg', 'black', 'dark magenta'),
     ('title', 'light magenta', 'light gray'),
     ('frame', 'white', 'light gray'),
-]
+    ('btn', 'light magenta', 'light gray')
+)
+
+FIELDS = (CheckBox(c, True) for c in DocumentLogicView.SCHEMA.keys() if c != 'id')
 
 class BaseContainer(Overlay):
     def __init__(self, top_widget: Widget, **kwargs):
@@ -28,18 +33,42 @@ class BaseContainer(Overlay):
 
 class SearchBar(WidgetWrap):
     def __init__(self, **kwargs):
-        self.label = Text('Textual search: ')
-        self.text_field = Edit(wrap = 'clip')
-        self.search_button = Button('Go', on_press = lambda btn: Events.SEARCH.value.notify(self.text_field.edit_text))
-        print(self.label.pack())
+        self.search_text_label = Text('Textual search: ')
+        self.search_text_field = Edit(wrap = 'clip')
+        self.room_type_label = Text('Room type: ')
+        self.room_type_field = Edit(wrap = 'clip')
+        self.sentiment_label = Text('Sentiment tags: ')
+        self.sentiment_field = Edit(wrap = 'clip')
+        self.search_text = Columns((
+            ('pack', self.search_text_label),
+            ('weight', 75, LineBox(self.search_text_field, tline='', lline='', rline='')),
+            ('weight', 3, Divider()),
+            ('pack', self.room_type_label),
+            ('weight', 30, LineBox(self.room_type_field, tline='', lline='', rline='')),
+            ('weight', 3, Divider()),
+            ('pack', self.sentiment_label),
+            ('weight', 30, LineBox(self.sentiment_field, tline='', lline='', rline='')),
+        ))
+
+        self.search_fields_label = Text('Search fields: ')
+        self.search_fields_checkboxes = Columns(FIELDS)
+        self.search_button = Button(('btn', 'Go'), on_press = lambda btn: Events.SEARCH.value.notify(self.text_field.edit_text))
+        self.search_fields = Columns((
+            ('pack', self.search_fields_label),
+            ('weight', 75, self.search_fields_checkboxes),
+            ('weight', 10, Divider()),
+            ('pack', self.search_button),
+        ))
+
         self.search_bar = Filler(
-            Columns((
-                (self.label.pack()[0], self.label),
-                LineBox(self.text_field, tline='', lline='', rline=''),
-                (self.search_button.pack()[0], self.search_button)
+            ListBox((
+                self.search_text,
+                self.search_fields
             )),
+            height=4,
             **kwargs
         )
+        
         WidgetWrap.__init__(self, self.search_bar)
     
     def keypress(self, size, key):
@@ -49,7 +78,7 @@ class SearchBar(WidgetWrap):
 class SearchArea(WidgetWrap):
     def __init__(self, **kwargs):
         self.search_bar = SearchBar()
-        self.result_area = ListBox([Text('Mock')] * 10)
+        self.result_area = ListBox((Text('Mock'),) * 10)
         self.search_area = Frame(
             header = self.search_bar,
             body = self.result_area,
@@ -57,6 +86,7 @@ class SearchArea(WidgetWrap):
             **kwargs
         )
         WidgetWrap.__init__(self, self.search_area)
+
 
 class Window(WidgetWrap):
     def __init__(self):
