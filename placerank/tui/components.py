@@ -87,6 +87,24 @@ class SearchArea(WidgetWrap):
         )
         WidgetWrap.__init__(self, self.search_area)
 
+class Controls(WidgetWrap):
+    def __init__(self, **kwargs):
+        self.advanced = Button('Advanced')
+        self.help = Button('Help')
+        self.exit = Button('Exit')
+        self.controls = Filler(
+            Columns((
+                ('weight', 35, Divider()),
+                ('weight', 6, self.advanced),
+                ('weight', 6, Divider()),
+                ('weight', 6, self.help),
+                ('weight', 6, Divider()),
+                ('weight', 6, self.exit),
+                ('weight', 35, Divider()),
+            )),
+            **kwargs
+        )
+        WidgetWrap.__init__(self, self.controls)
 
 class Window(WidgetWrap):
     def __init__(self):
@@ -97,10 +115,11 @@ class Window(WidgetWrap):
         self.search_area = SearchArea()
         self.search_area = LineBox(self.search_area)
         self.search_area = Padding(self.search_area, width = ('relative', 90), align = 'center')
+        self.controls = Controls()
         self.inner_container = Frame(
             header = self.description,
             body = self.search_area,
-            footer = Text("controls")
+            footer = self.controls
         )
         self.base_container = BaseContainer(self.inner_container)
         WidgetWrap.__init__(self, self.base_container)
