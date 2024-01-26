@@ -93,12 +93,12 @@ def main():
     """
 
     bench = Benchmark()
-    ix = open_dir("index/naive")
+    ix = open_dir("index/benchmark")
 
     bench.test_against(ix)
-    print(bench.results)
-    print(bench.recall())
-    print(bench.precision())
+    
+    for (query, results), (_q, precision), (__q, recall) in zip(bench.results, bench.precision(), bench.recall()):
+        print(f"{query.text} {results} p:{precision} r:{recall}")
 
 if __name__ == "__main__":
     main()
