@@ -1,0 +1,9 @@
+[
+    {
+        "uin": "1,Manhattan apartment with NY skyline view with big and bright open space",
+        "query": "Manhattan apartment with skyline view",
+        "room_type": "Entire room/apt",
+        "sentiments": ["Astonishing", "Bright", "Cozy"],
+        "relevant": [101, 90, 87]
+    }
+]

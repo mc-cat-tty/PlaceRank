@@ -4,6 +4,7 @@ from whoosh.fields import FieldType, Schema, ID, TEXT, KEYWORD
 from csv import DictReader
 import pydash
 import os
+import json
 
 class InsideAirbnbSchema(Schema):
     """
@@ -118,15 +119,37 @@ class BenchmarkRecordView:
         return view
 
 
+class BenchmarkDataset:
+    """
+    Helper class to open and decode the benchmark dataset in JSON.
+    """
+
+    def __init__(self, fp):
+        """
+        :fp: file pointer to the dataset
+        """
+
+        self.queries = json.load(fp, object_hook=BenchmarkDataset.row_object_decoder)
+
+    @staticmethod
+    def row_object_decoder(dict_repr):
+        """
+        Decodes a benchmark query encoded as a JSON row into a BenchmarkQuery object.
+        """
+
+        #TODO: provide decoding
+        return dict_repr
+
+
 def main():
     """
     Test program for benchmark loading.
     """
 
-    with open("validation/uin.csv") as uin, open("validation/query.csv") as query, open("validation/expected_ranking.csv") as relev:
-        view = BenchmarkRecordView.get_view_from_csv(uin.readlines(), query.readlines(), relev.readlines())
+    with open("validation/benchmark.json") as fp:
+        dset = BenchmarkDataset(fp)
 
-    print(view)
+    print(dset.queries)
 
 if __name__ == "__main__":
     main()
