@@ -28,17 +28,17 @@ from whoosh.scoring import WeightingModel
 from whoosh.searching import Results
 from whoosh.index import Index
 from typing import List
+from whoosh.qparser import QueryParser
+
 
 
 class IRModel(ABC):
     def __init__(
         self,
-        index: Index,
         preprocessing_pipeline: CompositeAnalyzer,
         tolerant_retrieval_service: TolerantRetrievalService,
         retrieval_model: RetrievalModel
     ):
-        self._index = index
         self._preprocessing_pipeline = preprocessing_pipeline
         self._tolerant_retrieval_service = tolerant_retrieval_service
         self._retrieval_model = retrieval_model
@@ -48,6 +48,9 @@ class IRModel(ABC):
     def search(self, query: QueryView) -> List[ResultView]:
         ...
 
+class IRModelDumb(IRModel):
+    def search(self, query):
+        return self._retrieval_model.search(query)
 
 class TolerantRetrievalService(ABC):
     """
@@ -74,3 +77,10 @@ class RetrievalModel(ABC):
     @abstractmethod
     def search(self, query: str) -> Results:
         ...
+
+class RetrievalModelDumb(RetrievalModel):
+    def search(self, query: QueryView) -> List[ResultView]:
+        parser = QueryParser("neighborhood_overview", self._index.schema)
+        query = parser.parse(query.textual_query)
+        with self._index.searcher() as s:
+            return [ResultView(**hit) for hit in s.search(query)]

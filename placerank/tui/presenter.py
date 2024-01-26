@@ -28,4 +28,4 @@ class Presenter:
         self.search_observser = Observer(self.search_query_update, [Events.SEARCH_QUERY_UPDATE.value])
     
     def search_query_update(self, event: Event, query: QueryView) -> Any:
-        Events.SEARCH_RESULTS_UPDATE.value.notify([ResultView(101, 'Page', 'Entire'),] * 30)
+        Events.SEARCH_RESULTS_UPDATE.value.notify(self._model.search(query))

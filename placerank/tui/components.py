@@ -1,5 +1,6 @@
 from __future__ import annotations
 import functools
+from tkinter import font
 from tkinter.tix import MAIN
 from urwid import *
 from placerank.views import SearchFields, ResultView, QueryView
@@ -220,6 +221,7 @@ class Window(WidgetWrap):
         
         self.description.set_text('HELP PAGE')
         self.current_page = self.Page.HELP
+        Events.MOVE_FOCUS_TO_SEARCH.value.unregister_observer(self.inner_container_focus_change)
     
     def _open_advanced_page(self, event: Event):
         if self.current_page == self.Page.ADVANCED: return
@@ -230,6 +232,7 @@ class Window(WidgetWrap):
         )
         self.description.set_text('ADVANCED PAGE')
         self.current_page = self.Page.ADVANCED
+        Events.MOVE_FOCUS_TO_SEARCH.value.unregister_observer(self.inner_container_focus_change)
     
     def _open_result(self, event: Event, doc_id: int):
         if self.current_page == doc_id: return

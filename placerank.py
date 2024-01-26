@@ -1,7 +1,9 @@
 from placerank.tui.components import *
 from placerank.tui.events import *
 from placerank.tui.presenter import *
-from placerank.models import IRModel
+from placerank.models import *
+from placerank.preprocessing import get_default_analyzer
+from whoosh.index import open_dir
 from urwid import MainLoop, ExitMainLoop
 import signal
 
@@ -15,7 +17,9 @@ def main() -> None:
 
     with open(HELP_FILENAME, 'r') as readme:
         window = Window(readme.read())
-    presenter = Presenter(IRModel())
+    
+    idx = open_dir("index")
+    presenter = Presenter(IRModelDumb(get_default_analyzer(), None, RetrievalModelDumb(idx, None)))
     loop = MainLoop(window, palette=PALETTE)
     loop.run()
 
