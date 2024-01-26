@@ -28,5 +28,4 @@ class Presenter:
         self.search_observser = Observer(self.search_query_update, [Events.SEARCH_QUERY_UPDATE.value])
     
     def search_query_update(self, event: Event, query: QueryLogicView) -> Any:
-        print(query)
-    
+        Events.SEARCH_RESULTS_UPDATE.value.notify([f'FOUND {query.textual_query}',] * 10)

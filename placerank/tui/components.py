@@ -96,17 +96,25 @@ class SearchBar(WidgetWrap):
 class SearchArea(WidgetWrap):
     def __init__(self, **kwargs):
         self.search_bar = SearchBar()
-        self.result_area = ListBox((Text('Mock'),) * 10)
+        self.results = SimpleFocusListWalker([])
+        self.result_area = ListBox(self.results)
         self.search_area = Pile(
             (('pack', self.search_bar), self.result_area),
             focus_item = self.search_bar,
             **kwargs
         )
+
+        self.search_results_update = Observer(self._results_listener, [Events.SEARCH_RESULTS_UPDATE.value])
+
         WidgetWrap.__init__(self, self.search_area)
     
     def keypress(self, size, key):
         if key != 'tab': return super().keypress(size, key)
         Events.MOVE_FOCUS_TO_CONTROLS.value.notify()
+    
+    def _results_listener(self, event: Event, results: List[str]) -> None:
+        self.results.clear()
+        self.results.extend(SimpleFocusListWalker(map(Text, results)))
 
 class Controls(WidgetWrap):
     def __init__(self, **kwargs):
