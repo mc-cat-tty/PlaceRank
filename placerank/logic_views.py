@@ -3,6 +3,7 @@ from placerank.preprocessing import get_default_analyzer
 from whoosh.fields import FieldType, Schema, ID, TEXT, KEYWORD
 from csv import DictReader
 import pydash
+import os
 
 class InsideAirbnbSchema(Schema):
     """
@@ -34,7 +35,7 @@ class InsideAirbnbSchema(Schema):
 
 class BenchmarkRecordView:
     """
-    A class which both keeps a logic representation (namely, the view) of a benchmark queries record and
+    A class which both keeps a logic representation (namely, the view) of a benchmark query record and
     exposes some helper methods to emulate a relational database behavior building on top of different
     CSV files with a common primary key field.
     """
@@ -52,7 +53,7 @@ class BenchmarkRecordView:
     def get_view_from_csv(uin_table: List[str], query_table: List[str], ranking_table: List[str]) -> Dict[str, str | int  | List[int]]:
         """
         Takes three tables - uin_table, query_table and ranking_table - as input and joins them on `uin_id` field, returning a view
-        of the benchmark query record. The aferomentioned tables must have a well-defined minimal scheme:
+        of the benchmark query record. The aforementioned tables must have a well-defined minimal scheme:
             - uin_table (uin_id int pk, uin str)
             - query_table (uin_id int pk, textual_query str, room_type str, sentiment_tags str)
             - ranking_table (uin_id int fk, doc_id int) pk(uin_id, doc_id)
@@ -116,3 +117,16 @@ class BenchmarkRecordView:
 
         return view
 
+
+def main():
+    """
+    Test program for benchmark loading.
+    """
+
+    with open("validation/uin.csv") as uin, open("validation/query.csv") as query, open("validation/expected_ranking.csv") as relev:
+        view = BenchmarkRecordView.get_view_from_csv(uin.readlines(), query.readlines(), relev.readlines())
+
+    print(view)
+
+if __name__ == "__main__":
+    main()
