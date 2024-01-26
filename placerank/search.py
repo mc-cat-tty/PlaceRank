@@ -42,7 +42,7 @@ def vector_boolean_search(ix, query: str) -> set[int]:
 
     with ix.searcher(weighting=FunctionWeighting(__binary_scoring)) as searcher:
         res = searcher.search(q)
-        return res.docs()
+        return [int(r.get("id")) for r in res]
 
 
 def vector_tfidf_search(ix, query: str) -> set[int]:
@@ -55,7 +55,7 @@ def vector_tfidf_search(ix, query: str) -> set[int]:
 
     with ix.searcher(weighting=TF_IDF) as searcher:
         res = searcher.search(q)
-        return res.docs()
+        return [int(r.get("id")) for r in res]
     
 
 def vector_bm25_search(ix, query: str) -> set[int]:
@@ -68,7 +68,7 @@ def vector_bm25_search(ix, query: str) -> set[int]:
 
     with ix.searcher(weighting=BM25F) as searcher:
         res = searcher.search(q)
-        return res.docs()
+        return [int(r.get("id")) for r in res]
 
 
 def index_search(ix, query: str, strategy = None) -> list[int]:
