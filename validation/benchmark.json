@@ -1,9 +1,30 @@
 [
     {
-        "uin": "Manhattan apartment with NY skyline view with big and bright open space",
-        "text": "Manhattan apartment with skyline view",
-        "room_type": "Entire room/apt",
-        "sentiments": ["Astonishing", "Bright", "Cozy"],
-        "relevant": [101, 90, 87]
+        "uin": "Find me a room in someone's home near the Harvard University",
+        "text": "private room near harvard",
+        "room_type": "Private room",
+        "sentiments": [],
+        "relevant": [38360503,863179731043996638,38492542,8200278,863789008478115840,863857193342827363,956502103640995095,41273964,1021054928767481892,38823935,38960329,1021108240597166760,1024631607696785445,1021024681841646418,1021088928078185998,683527896872706362,1021131856491372052,682754796766681556,682742536989144884,1021121664023217954,1021083486109008221,38822539,41288141,33692520,37460222,7080737,13600523]
+    },
+    {
+        "uin": "I need an accomodation for my staying in Cambridge to help a parent in a local hospital",
+        "text": "home by the hospital",
+        "room_type": "Entire home/apt",
+        "sentiments": [],
+        "relevant": [918749466220965200,5666988,53574737,7729257,7881324,7883909,633276447851296684,752145851463773023,988456532079671597,15930566,18151308,889777551432433232,15523233,22842459,7872594,15023471]
+    },
+    {
+        "uin": "A spacious house for a group of guys on holiday",
+        "text": "house for group",
+        "room_type": "Entire home/apt",
+        "sentiments": [],
+        "relevant": [8758789, 949475573742371181, 6662157, 21012161, 1984737]
+    },
+    {
+        "uin": "I need a stay for me and my dog, I don't care about the cost",
+        "text": "dog-friendly",
+        "room_type": "",
+        "sentiments": [],
+        "relevant": [730342004988112602, 728859657019705842, 699096142291925099, 3506058, 3510127, 8308744, 33789540, 816862960601482709, 898743835070344633, 49026967, 49574487]
     }
 ]
