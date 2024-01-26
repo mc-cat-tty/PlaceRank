@@ -6,9 +6,24 @@ import io
 import os
 import csv
 import gzip
+import pydash
 
 LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
+CACHE_FILE = "datasets/listings.csv"
 
+def cached_download(filename: str):
+    def decorator(download_function):
+        def inner(storage: io.StringIO):
+            if not os.path.isfile(filename):
+                storage = download_function(storage)
+                with open(filename, 'w') as cache: print(storage.getvalue(), file=cache)
+            else:
+                with open(filename, 'r') as cache: storage = io.StringIO(cache.read())
+            return storage
+        return inner
+    return decorator
+
+@cached_download(CACHE_FILE)
 def download_dataset_source(storage: io.StringIO) -> io.StringIO:
     """
     Download data of InsideAirbnb and unpacks it in memory.
@@ -43,7 +58,7 @@ def populate_index(index_dir: str):
     ix = create_index(index_dir)
 
     with io.StringIO() as storage, ix.writer() as writer:
-        download_dataset_source(storage)
+        storage = download_dataset_source(storage)
 
         dset = csv.DictReader(storage)
 
@@ -51,6 +66,19 @@ def populate_index(index_dir: str):
             writer.add_document(**DocumentLogicView(row))
 
     ix.close()
+
+
+def load_page(id: int) -> DocumentLogicView:
+    """
+    TODO: optimize using in-memory dataset
+    """
+    with open(CACHE_FILE, 'r') as listings:
+        return DocumentLogicView(
+            pydash.chain(csv.DictReader(listings.readlines()))
+                .filter(lambda r: int(r['id']) == id)
+                .value()
+                .pop()
+        )
 
 
 if __name__ == "__main__":
