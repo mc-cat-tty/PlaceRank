@@ -4,7 +4,6 @@ Module to test performance of an index against predefined queries.
 
 import json
 
-
 class BenchmarkQuery:
     """
     Representation of a benchmark query. Provides access to the UIN, textual query,
@@ -44,7 +43,7 @@ class BenchmarkDataset:
 
 class Benchmark:
 
-    def __init__(self, bm_dataset_path: str = "validation"):
+    def __init__(self, bm_dataset_path: str = "validation/benchmark.json"):
         """
         Creates a Benchmark object that hold the benchmark dataset,
         i.e. a collection of queries and expected relevant documents.
@@ -52,7 +51,17 @@ class Benchmark:
         :bm_dataset_path: path of the benchmark dataset directory
         """
 
-        pass
+        with open(bm_dataset_path) as fp:
+            self.__dset = BenchmarkDataset(fp)
+
+
+    def test_against(self, index):
+        """
+        Tests the benchmark against a given index.
+        This is the first call needed to compute different measures.
+        """
+        
+        pass        
 
 
 def main():
@@ -60,10 +69,7 @@ def main():
     Test program for benchmark loading.
     """
 
-    with open("validation/benchmark.json") as fp:
-        dset = BenchmarkDataset(fp)
-
-    print(dset.queries)
+    bench = Benchmark()
 
 if __name__ == "__main__":
     main()
