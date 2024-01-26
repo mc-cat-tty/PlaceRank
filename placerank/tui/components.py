@@ -112,9 +112,14 @@ class ResultCard(WidgetWrap):
     def selectable(self):
         return True
 
+    def mouse_event(self, size, event, button, col, row, focus):
+        if event != 'mouse release': return super().mouse_event(size, event, button, col, row, focus)
+        Events.OPEN_RESULT.value.notify(self.result.id)
+
     def keypress(self, size, key):
         if key != 'enter': return super().keypress(size, key)
         Events.OPEN_RESULT.value.notify(self.result.id)
+
 
 
 class SearchArea(WidgetWrap):
