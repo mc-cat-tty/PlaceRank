@@ -7,6 +7,7 @@ import io
 import os
 import csv
 import gzip
+import sys
 
 LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
 
@@ -54,4 +55,4 @@ def populate_index(index_dir: str, analyzer: Analyzer = None):
 
 
 if __name__ == "__main__":
-    populate_index("index")
+    populate_index(sys.argv[1])
