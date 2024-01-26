@@ -64,8 +64,26 @@ class Benchmark:
         """
         
         # Produce a list of (query, retrieve_results)
-        self.results = [
+        self.__results = [
             (q, index_search(ix, q.text)) for q in self.__dset.queries
+        ]
+
+        self.results = self.__results
+        #TODO: remove self.results. Now permits inspection of the object without debugger
+
+    def recall(self):
+        recall = lambda r, a: len(set(r) & set(a)) / len(r)
+
+        return [
+            (q, recall(q.relevant, ans)) for q, ans in self.__results
+        ]
+    
+    def precision(self):
+        precision = lambda r, a: len(set(r) & set(a)) / len(a)
+
+        return [
+            (q, precision(q.relevant, ans) if len(ans) > 0 else 0)
+            for q, ans in self.__results
         ]
 
 
@@ -79,6 +97,8 @@ def main():
 
     bench.test_against(ix)
     print(bench.results)
+    print(bench.recall())
+    print(bench.precision())
 
 if __name__ == "__main__":
     main()
