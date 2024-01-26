@@ -1,7 +1,10 @@
 from __future__ import annotations
+import functools
 from urwid import *
+from placerank.views import SearchFields
 from placerank.tui.events import *
-from placerank.logic_views import DocumentLogicView
+from placerank.tui.presenter import *
+from functools import reduce
 
 PALETTE = (
     ('fg', 'black', 'light gray'),
@@ -11,7 +14,7 @@ PALETTE = (
     ('btn', 'light magenta', 'light gray')
 )
 
-FIELDS = (CheckBox(c, True) for c in DocumentLogicView.SCHEMA.keys() if c != 'id')
+FIELDS = (f.name for f in SearchFields)
 
 class BaseContainer(Overlay):
     def __init__(self, top_widget: Widget, **kwargs):
@@ -30,6 +33,8 @@ class BaseContainer(Overlay):
 
 class SearchBar(WidgetWrap):
     def __init__(self, **kwargs):
+        self.checkboxes: List[CheckBox] = [CheckBox(f, True) for f in FIELDS]
+        
         self.search_text_label = Text('Textual search: ')
         self.search_text_field = Edit(wrap = 'clip')
         self.room_type_label = Text('Room type: ')
@@ -48,8 +53,8 @@ class SearchBar(WidgetWrap):
         ))
 
         self.search_fields_label = Text('Search fields: ')
-        self.search_fields_checkboxes = Columns(FIELDS)
-        self.search_button = Button(('btn', 'Go'), on_press = lambda btn: Events.SEARCH.value.notify(self.text_field.edit_text))
+        self.search_fields_checkboxes = Columns(self.checkboxes)
+        self.search_button = Button(('btn', 'Go'), on_press = lambda btn: self._search_listener())
         self.search_fields = Columns((
             ('pack', self.search_fields_label),
             ('weight', 75, self.search_fields_checkboxes),
@@ -68,9 +73,25 @@ class SearchBar(WidgetWrap):
         
         WidgetWrap.__init__(self, self.search_bar)
     
+    def _get_checkboxes_state(self) -> SearchFields:
+        return functools.reduce(
+            lambda x, y: x | y,
+            (SearchFields[c.label] for c in self.checkboxes if c.state)
+        )
+
+    def _search_listener(self) -> None:
+        Events.SEARCH_QUERY_UPDATE.value.notify(
+            QueryLogicView(
+                self.search_text_field.edit_text,
+                self._get_checkboxes_state(),
+                self.room_type_field.edit_text,
+                self.sentiment_field.edit_text
+            )
+        )
+
     def keypress(self, size, key):
         if key != 'enter': return super().keypress(size, key)
-        Events.SEARCH.value.notify(self.text_field.edit_text)
+        self._search_listener()
 
 class SearchArea(WidgetWrap):
     def __init__(self, **kwargs):

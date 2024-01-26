@@ -1,10 +1,11 @@
-from typing import Dict
-from dataclasses import Field
+from typing import Dict, NamedTuple
 from placerank.preprocessing import get_default_analyzer
 from whoosh.fields import FieldType, Schema, ID, TEXT, KEYWORD
+from enum import Flag, auto, verify, NAMED_FLAGS
+
 
 class DocumentLogicView(dict):
-    SCHEMA : Dict[str, FieldType] = {
+    SCHEMA: Dict[str, FieldType] = {
         "id": ID(stored = True, unique=True),
         "name": TEXT(stored = True, field_boost=1.5),
         "room_type": KEYWORD(stored=True, lowercase=True),
@@ -17,8 +18,27 @@ class DocumentLogicView(dict):
         Extracts only the required keys from a dictionary representing a dataset record.
         The required keys are specified in the `SCHEMA` class field.
         """
-        super().__init__({k:record[k] for k in DocumentLogicView.SCHEMA.keys()})
+        super().__init__({k: record[k] for k in DocumentLogicView.SCHEMA.keys()})
     
     @staticmethod
     def get_schema() -> Schema:
         return Schema(**DocumentLogicView.SCHEMA)
+
+
+@verify(NAMED_FLAGS)
+class SearchFields(Flag):
+    """
+    This class holds a strong conceptual dependency
+    towards `DocumentLogicView`
+    """
+    NAME = auto()
+    ROOM_TYPE = auto()
+    DESCRIPTION = auto()
+    NEIGHBORHOOD_OVERVIEW = auto()
+
+
+class QueryLogicView(NamedTuple):
+    textual_query: str
+    search_fields: SearchFields = 0
+    room_type: str = ''
+    sentiment_tags: str = ''

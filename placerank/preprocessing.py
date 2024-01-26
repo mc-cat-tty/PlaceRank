@@ -60,7 +60,7 @@ def get_default_analyzer() -> Analyzer:
   To edit the default for the entire project, change the returned object below by selecting
   another one (for example ANALYZER_NAIVE), or specify your own.
 
-  This function is used by :py:`~placerank.logic_views.DocumentLogicView` when defining schema
+  This function is used by :py:`~placerank.views.DocumentLogicView` when defining schema
   for the inverted index.
   """
 

@@ -33,12 +33,12 @@ class Event:
 
 
 class Observer(ABC):
-    def __init__(self, notification_callback: Callable[[Event, Any, Any], None], event_list: List[Event] = []):
+    def __init__(self, notification_callback: Callable[[Event, Any, Any], Any], event_list: List[Event] = []):
         self.__notify_event = notification_callback
         if event_list:
             for e in event_list: e.register_observer(self)
     
-    def notify_event(self, caller: Event, *args, **kwargs):
+    def notify_event(self, caller: Event, *args, **kwargs) -> Any:
         return self.__notify_event(caller, *args, **kwargs)
 
 
@@ -47,9 +47,11 @@ class Events(Enum):
     `Events` is the aggregator under which all the events are stored
     and can be retrieved with the following syntax: `Events.NAME.value`
     """
-    SEARCH = Event()  # Search observers must listen for (event, search_text)
+    SEARCH_QUERY_UPDATE = Event()  # Observers must listen for (event, query_view)
+    SEARCH_RESULTS_UPDATE = Event()  # observer must listen for (event, search_results)
+
     MOVE_FOCUS_TO_CONTROLS = Event()  # Self-explanatory. Listen for (event,)
     MOVE_FOCUS_TO_SEARCH = Event()  # Self-explanatory. Listen for (event,)
+    
     ADVANCED_SCREEN = Event()
     HELP_SCREEN = Event()
-    EXIT_SCREEN = Event()
