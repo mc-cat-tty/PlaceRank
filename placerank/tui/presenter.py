@@ -12,6 +12,7 @@ from __future__ import annotations
 from placerank.models import IRModel
 from placerank.tui.events import Event, Events, Observer
 from placerank.views import QueryView, ResultView
+from placerank.dataset import load_page
 from typing import Any
 
 
@@ -26,6 +27,10 @@ class Presenter:
     def __init__(self, model: IRModel):
         self._model = model
         self.search_observser = Observer(self.search_query_update, [Events.SEARCH_QUERY_UPDATE.value])
+        self.open_result_request_observer = Observer(self.open_result_request, [Events.OPEN_RESULT_REQUEST.value])
     
-    def search_query_update(self, event: Event, query: QueryView) -> Any:
+    def search_query_update(self, event: Event, query: QueryView) -> None:
         Events.SEARCH_RESULTS_UPDATE.value.notify(self._model.search(query))
+
+    def open_result_request(self, event: Event, doc_id: int) -> None:
+        Events.OPEN_RESULT.value.notify(load_page(doc_id))

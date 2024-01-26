@@ -49,7 +49,8 @@ class Events(Enum):
     """
     SEARCH_QUERY_UPDATE = Event()  # Observers must listen for (event, query_view)
     SEARCH_RESULTS_UPDATE = Event()  # observers must listen for (event, search_results)
-    OPEN_RESULT = Event()  # Observers must listen for (event, doc_id)
+    OPEN_RESULT_REQUEST = Event()  # Observers must listen for (event, doc_id)
+    OPEN_RESULT = Event()  # Observers must listern for (event, document_view)
 
     MOVE_FOCUS_TO_CONTROLS = Event()  # Self-explanatory. Listen for (event,)
     MOVE_FOCUS_TO_SEARCH = Event()  # Self-explanatory. Listen for (event,)

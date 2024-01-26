@@ -68,14 +68,14 @@ def populate_index(index_dir: str):
     ix.close()
 
 
-def load_page(id: int) -> DocumentLogicView:
+def load_page(id: str) -> DocumentLogicView:
     """
     TODO: optimize using in-memory dataset
     """
     with open(CACHE_FILE, 'r') as listings:
         return DocumentLogicView(
             pydash.chain(csv.DictReader(listings.readlines()))
-                .filter(lambda r: int(r['id']) == id)
+                .filter(lambda r: r['id'] == id)
                 .value()
                 .pop()
         )

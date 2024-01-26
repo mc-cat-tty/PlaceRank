@@ -3,7 +3,7 @@ import functools
 from tkinter import font
 from tkinter.tix import MAIN
 from urwid import *
-from placerank.views import SearchFields, ResultView, QueryView
+from placerank.views import SearchFields, ResultView, QueryView, DocumentLogicView
 from placerank.tui.events import *
 from placerank.tui.presenter import *
 from enum import Enum, auto
@@ -101,9 +101,12 @@ class ResultCard(WidgetWrap):
         self.result = result
         self.card = Filler(
             AttrMap(
-                Columns(
-                    (Text(str(res_field))for res_field in result)
-                ),
+                Columns((
+                    (30, Text(str(result.id))),
+                    Text(str(result.name)),
+                    Text(str(result.room_type)),
+
+                )),
                 None, focus_map='reversed'
             ),
             **kwargs
@@ -115,11 +118,11 @@ class ResultCard(WidgetWrap):
 
     def mouse_event(self, size, event, button, col, row, focus):
         if event != 'mouse release': return super().mouse_event(size, event, button, col, row, focus)
-        Events.OPEN_RESULT.value.notify(self.result.id)
+        Events.OPEN_RESULT_REQUEST.value.notify(self.result.id)
 
     def keypress(self, size, key):
         if key != 'enter': return super().keypress(size, key)
-        Events.OPEN_RESULT.value.notify(self.result.id)
+        Events.OPEN_RESULT_REQUEST.value.notify(self.result.id)
 
 
 
@@ -206,7 +209,7 @@ class Window(WidgetWrap):
         )
         self.help_page_request = Observer(self._open_help_page, [Events.HELP_SCREEN.value])
         self.advanced_page_request = Observer(self._open_advanced_page, [Events.ADVANCED_SCREEN.value])
-        self.open_result_request = Observer(self._open_result, [Events.OPEN_RESULT.value])
+        self.open_result= Observer(self._open_result, [Events.OPEN_RESULT.value])
         self.exit_callback = Observer(self._exit_callback, [Events.EXIT.value])
 
         WidgetWrap.__init__(self, self.base_container)
@@ -234,11 +237,13 @@ class Window(WidgetWrap):
         self.current_page = self.Page.ADVANCED
         Events.MOVE_FOCUS_TO_SEARCH.value.unregister_observer(self.inner_container_focus_change)
     
-    def _open_result(self, event: Event, doc_id: int):
-        if self.current_page == doc_id: return
+    def _open_result(self, event: Event, doc: DocumentLogicView):
+        if self.current_page == doc['id']: return
 
         self.content_area.original_widget = Padding(
-            LineBox(Text('Page')),
+            LineBox(Pile(
+                (Text([('title', f'{key.upper()}: '), val]) for key, val in doc.items())
+            )),
             width = ('relative', 90), align = 'center'
         )
         self.current_page = 1
