@@ -8,6 +8,7 @@ Final assignment of the "Gestione dell'informazione" course at University of Mod
 How to move
 ----------------
 
-If you are lucky, your terminal provides mouse support: click and should work out-of-the-box and
+If you are lucky, your terminal provides mouse support: click and should work out-of-the-box, enabling you to interact with widgets though clicks.
 
-Arrows (UP, DOWN, LEFT and RIGHT)
+Arrows (UP, DOWN, LEFT and RIGHT) move the cursor in a given direction.
+Tab moves the cursor from the search area to the bottom controls, when possible (eg. while reading this page no search area is available, so the focus can't be moved).
