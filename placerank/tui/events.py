@@ -48,10 +48,12 @@ class Events(Enum):
     and can be retrieved with the following syntax: `Events.NAME.value`
     """
     SEARCH_QUERY_UPDATE = Event()  # Observers must listen for (event, query_view)
-    SEARCH_RESULTS_UPDATE = Event()  # observer must listen for (event, search_results)
+    SEARCH_RESULTS_UPDATE = Event()  # observers must listen for (event, search_results)
+    OPEN_RESULT = Event()  # Observers must listen for (event, doc_id)
 
     MOVE_FOCUS_TO_CONTROLS = Event()  # Self-explanatory. Listen for (event,)
     MOVE_FOCUS_TO_SEARCH = Event()  # Self-explanatory. Listen for (event,)
     
-    ADVANCED_SCREEN = Event()
-    HELP_SCREEN = Event()
+    ADVANCED_SCREEN = Event()  # Self-explanatory. Listen for (event,)
+    HELP_SCREEN = Event()  # Self-explanatory. Listen for (event,)
+    EXIT = Event()  # Self-explanatory. Listen for (event,)

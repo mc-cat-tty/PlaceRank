@@ -1,10 +1,11 @@
 from __future__ import annotations
 import functools
+from tkinter.tix import MAIN
 from urwid import *
 from placerank.views import SearchFields, ResultView, QueryView
 from placerank.tui.events import *
 from placerank.tui.presenter import *
-from functools import reduce
+from enum import Enum, auto
 
 PALETTE = (
     ('fg', 'black', 'light gray'),
@@ -96,6 +97,7 @@ class SearchBar(WidgetWrap):
 
 class ResultCard(WidgetWrap):
     def __init__(self, result: ResultView, **kwargs):
+        self.result = result
         self.card = Filler(
             AttrMap(
                 Columns(
@@ -112,12 +114,13 @@ class ResultCard(WidgetWrap):
 
     def keypress(self, size, key):
         if key != 'enter': return super().keypress(size, key)
+        Events.OPEN_RESULT.value.notify(self.result.id)
 
 
 class SearchArea(WidgetWrap):
     def __init__(self, **kwargs):
         self.search_bar = SearchBar()
-        self.results = SimpleFocusListWalker([ResultCard(ResultView(10, 'test', 'azz'))] * 20)
+        self.results = SimpleFocusListWalker([])
         self.result_area = ListBox(self.results)
         self.search_area = Pile(
             (('pack', self.search_bar), self.result_area),
@@ -160,30 +163,86 @@ class Controls(WidgetWrap):
         Events.MOVE_FOCUS_TO_SEARCH.value.notify()
     
     def btn_press(self, btn):
-        if btn == self.advanced: Events.ADVANCED_SCREEN.value.notify()
-        if btn == self.help: Events.HELP_SCREEN.value.notify()
-        if btn == self.exit: raise ExitMainLoop()
+        if btn == self.advanced: return Events.ADVANCED_SCREEN.value.notify()
+        if btn == self.help: return Events.HELP_SCREEN.value.notify()
+        if btn == self.exit: return Events.EXIT.value.notify()
 
 class Window(WidgetWrap):
-    def __init__(self):
-        self.description = Text(
+    class Page(Enum): MAIN = auto(); HELP = auto(); ADVANCED = auto()
+
+    def __init__(self, help_txt: str):
+        # STATE
+        self.help_txt = help_txt
+        self.main_description_txt = (
             '''Full-text search engine for AirBnB listings with support for sentiment analysis and word2vec.\n'''
             '''Try it yourself with queries like: "Manhattan apartment with amazing skyline view", "Row house nearby Brooklyn Bridge", "Cheap room in dangerous block"'''
         )
+        self.current_page: int | self.Page = MAIN
+
+        # COMPONENTS
+        self.description = Text(self.main_description_txt)
         self.search_area = SearchArea()
         self.search_area = LineBox(self.search_area)
         self.search_area = Padding(self.search_area, width = ('relative', 90), align = 'center')
+        self.content_area = WidgetPlaceholder(self.search_area)
         self.controls = Controls()
         self.inner_container = Frame(
             header = self.description,
-            body = self.search_area,
+            body = self.content_area,
             footer = self.controls
         )
         self.base_container = BaseContainer(self.inner_container)
         
+        # CALLBACKS
         self.inner_container_focus_change = Observer(
             lambda e: self.inner_container.set_focus('footer' if e == Events.MOVE_FOCUS_TO_CONTROLS.value else 'body'),
             [Events.MOVE_FOCUS_TO_CONTROLS.value, Events.MOVE_FOCUS_TO_SEARCH.value]
         )
+        self.help_page_request = Observer(self._open_help_page, [Events.HELP_SCREEN.value])
+        self.advanced_page_request = Observer(self._open_advanced_page, [Events.ADVANCED_SCREEN.value])
+        self.open_result_request = Observer(self._open_result, [Events.OPEN_RESULT.value])
+        self.exit_callback = Observer(self._exit_callback, [Events.EXIT.value])
 
         WidgetWrap.__init__(self, self.base_container)
+
+    def _open_help_page(self, event: Event):
+        if self.current_page == self.Page.HELP: return
+
+        self.content_area.original_widget = Padding(
+            LineBox(Text(self.help_txt)),
+            width = ('relative', 90), align = 'center'
+        )
+        
+        self.description.set_text('HELP PAGE')
+        self.current_page = self.Page.HELP
+    
+    def _open_advanced_page(self, event: Event):
+        if self.current_page == self.Page.ADVANCED: return
+
+        self.content_area.original_widget = Padding(
+            LineBox(Text('Advanced')),
+            width = ('relative', 90), align = 'center'
+        )
+        self.description.set_text('ADVANCED PAGE')
+        self.current_page = self.Page.ADVANCED
+    
+    def _open_result(self, event: Event, doc_id: int):
+        if self.current_page == doc_id: return
+
+        self.content_area.original_widget = Padding(
+            LineBox(Text('Page')),
+            width = ('relative', 90), align = 'center'
+        )
+        self.current_page = 1
+        self.inner_container.set_focus('footer')
+        self.controls.controls.set_focus(5)
+        Events.MOVE_FOCUS_TO_SEARCH.value.unregister_observer(self.inner_container_focus_change)
+    
+    def _exit_callback(self, event: Event):
+        if self.current_page == self.Page.MAIN:
+            raise ExitMainLoop()
+        
+        Events.MOVE_FOCUS_TO_SEARCH.value.register_observer(self.inner_container_focus_change)
+        self.description.set_text(self.main_description_txt)
+        self.content_area.original_widget = self.search_area
+        self.current_page = self.Page.MAIN
