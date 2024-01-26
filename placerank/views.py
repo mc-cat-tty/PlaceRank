@@ -27,18 +27,19 @@ class DocumentLogicView(dict):
 
 @verify(NAMED_FLAGS)
 class SearchFields(Flag):
-    """
-    This class holds a strong conceptual dependency
-    towards `DocumentLogicView`
-    """
     NAME = auto()
     ROOM_TYPE = auto()
     DESCRIPTION = auto()
     NEIGHBORHOOD_OVERVIEW = auto()
 
 
-class QueryLogicView(NamedTuple):
+class QueryView(NamedTuple):
     textual_query: str
     search_fields: SearchFields = 0
     room_type: str = ''
     sentiment_tags: str = ''
+
+class ResultView(NamedTuple):
+    id: int
+    name: str
+    room_type: str

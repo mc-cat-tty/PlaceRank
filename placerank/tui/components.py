@@ -1,7 +1,7 @@
 from __future__ import annotations
 import functools
 from urwid import *
-from placerank.views import SearchFields
+from placerank.views import SearchFields, ResultView, QueryView
 from placerank.tui.events import *
 from placerank.tui.presenter import *
 from functools import reduce
@@ -11,7 +11,8 @@ PALETTE = (
     ('bg', 'black', 'dark magenta'),
     ('title', 'light magenta', 'light gray'),
     ('frame', 'white', 'light gray'),
-    ('btn', 'light magenta', 'light gray')
+    ('btn', 'light magenta', 'light gray'),
+    ('reversed', 'white', 'dark magenta', 'standout'),  # Improper use. Remove this record for real inverted color focused items
 )
 
 FIELDS = (f.name for f in SearchFields)
@@ -81,7 +82,7 @@ class SearchBar(WidgetWrap):
 
     def _search_listener(self) -> None:
         Events.SEARCH_QUERY_UPDATE.value.notify(
-            QueryLogicView(
+            QueryView(
                 self.search_text_field.edit_text,
                 self._get_checkboxes_state(),
                 self.room_type_field.edit_text,
@@ -93,10 +94,30 @@ class SearchBar(WidgetWrap):
         if key != 'enter': return super().keypress(size, key)
         self._search_listener()
 
+class ResultCard(WidgetWrap):
+    def __init__(self, result: ResultView, **kwargs):
+        self.card = Filler(
+            AttrMap(
+                Columns(
+                    (Text(str(res_field))for res_field in result)
+                ),
+                None, focus_map='reversed'
+            ),
+            **kwargs
+        )
+        WidgetWrap.__init__(self, self.card)
+    
+    def selectable(self):
+        return True
+
+    def keypress(self, size, key):
+        if key != 'enter': return super().keypress(size, key)
+
+
 class SearchArea(WidgetWrap):
     def __init__(self, **kwargs):
         self.search_bar = SearchBar()
-        self.results = SimpleFocusListWalker([])
+        self.results = SimpleFocusListWalker([ResultCard(ResultView(10, 'test', 'azz'))] * 20)
         self.result_area = ListBox(self.results)
         self.search_area = Pile(
             (('pack', self.search_bar), self.result_area),
@@ -112,9 +133,10 @@ class SearchArea(WidgetWrap):
         if key != 'tab': return super().keypress(size, key)
         Events.MOVE_FOCUS_TO_CONTROLS.value.notify()
     
-    def _results_listener(self, event: Event, results: List[str]) -> None:
+    def _results_listener(self, event: Event, results: List[ResultView]) -> None:
         self.results.clear()
-        self.results.extend(SimpleFocusListWalker(map(Text, results)))
+        self.results.append(Text(f'Showing top {len(results)} results'))
+        self.results.extend(SimpleFocusListWalker(map(ResultCard, results)))
 
 class Controls(WidgetWrap):
     def __init__(self, **kwargs):

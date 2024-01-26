@@ -11,7 +11,7 @@ model being injected as a dependency in it.
 from __future__ import annotations
 from placerank.models import IRModel
 from placerank.tui.events import Event, Events, Observer
-from placerank.views import QueryLogicView
+from placerank.views import QueryView, ResultView
 from typing import Any
 
 
@@ -27,5 +27,5 @@ class Presenter:
         self._model = model
         self.search_observser = Observer(self.search_query_update, [Events.SEARCH_QUERY_UPDATE.value])
     
-    def search_query_update(self, event: Event, query: QueryLogicView) -> Any:
-        Events.SEARCH_RESULTS_UPDATE.value.notify([f'FOUND {query.textual_query}',] * 10)
+    def search_query_update(self, event: Event, query: QueryView) -> Any:
+        Events.SEARCH_RESULTS_UPDATE.value.notify([ResultView(101, 'Page', 'Entire'),] * 30)
