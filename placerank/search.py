@@ -71,13 +71,15 @@ def vector_bm25_search(ix, query: str) -> set[int]:
         return res.docs()
 
 
-def index_search(ix, query: str, strategy: None) -> list[int]:
+def index_search(ix, query: str, strategy = None) -> list[int]:
     """
     Performs index search for a given query and returns an ordered list of document IDs.
     With no strategy, this performs a default TF-IDF scoring on retrieval.
+
+    TODO: move to a ranked list of results, opposed to a set.
     """
 
-    vector_tfidf_search(ix, query)
+    return vector_tfidf_search(ix, query)
 
 
 def main():

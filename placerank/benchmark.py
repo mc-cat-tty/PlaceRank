@@ -2,6 +2,8 @@
 Module to test performance of an index against predefined queries.
 """
 
+from placerank.search import index_search
+from whoosh.index import open_dir
 import json
 
 class BenchmarkQuery:
@@ -14,7 +16,7 @@ class BenchmarkQuery:
         self.__dict__.update(**row_dict)
 
     def __repr__(self):
-        return f"<BenchmarkQuery {self.uin}, {self.query}, {self.room_type}, {self.relevant}, {self.sentiments}"
+        return f"<BenchmarkQuery {self.uin}, {self.text}, {self.room_type}, {self.relevant}, {self.sentiments}"
 
 
 class BenchmarkDataset:
@@ -55,13 +57,16 @@ class Benchmark:
             self.__dset = BenchmarkDataset(fp)
 
 
-    def test_against(self, index):
+    def test_against(self, ix):
         """
         Tests the benchmark against a given index.
         This is the first call needed to compute different measures.
         """
         
-        pass        
+        # Produce a list of (query, retrieve_results)
+        self.results = [
+            (q, index_search(ix, q.text)) for q in self.__dset.queries
+        ]
 
 
 def main():
@@ -70,6 +75,10 @@ def main():
     """
 
     bench = Benchmark()
+    ix = open_dir("index/naive")
+
+    bench.test_against(ix)
+    print(bench.results)
 
 if __name__ == "__main__":
     main()
