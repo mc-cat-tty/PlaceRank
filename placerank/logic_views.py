@@ -119,9 +119,23 @@ class BenchmarkRecordView:
         return view
 
 
+class BenchmarkQuery:
+    """
+    Representation of a benchmark query. Provides access to the UIN, textual query,
+    relevant set, required sentiments and room type as fields.
+    """
+
+    def __init__(self, row_dict):
+        self.__dict__.update(**row_dict)
+
+    def __repr__(self):
+        return f"<BenchmarkQuery {self.uin}, {self.query}, {self.room_type}, {self.relevant}, {self.sentiments}"
+
+
 class BenchmarkDataset:
     """
     Helper class to open and decode the benchmark dataset in JSON.
+    A BenchmarkDataset is a list of BenchmarkQuery objects.
     """
 
     def __init__(self, fp):
@@ -137,7 +151,8 @@ class BenchmarkDataset:
         Decodes a benchmark query encoded as a JSON row into a BenchmarkQuery object.
         """
 
-        #TODO: provide decoding
+        if "uin" in dict_repr:
+            return BenchmarkQuery(dict_repr)
         return dict_repr
 
 
