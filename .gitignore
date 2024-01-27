@@ -166,4 +166,4 @@ cython_debug/
 index
 
 # Ignore big CSV files
-datasets/listings.csv
+datasets/*.csv
