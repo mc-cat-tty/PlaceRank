@@ -111,8 +111,24 @@ class Benchmark:
             (q, [self._compute_precision_at_r(q.relevant, ans)]) for q, ans in self.__results
         ]
     
+    def _compute_p_at_recall(self, relevant, answer):
+        """
+        Computes precision at different levels of recall for a given query.
+        """
+
+        p_at_r = self._compute_precision_at_r(relevant, answer)
+        p_at_recall = p_at_r[:1]
+
+        for prev, curr in zip(p_at_r, p_at_r[1:]):
+            if prev[1] < curr[1]:   # if recall increases
+                p_at_recall.append(curr)
+
+        return p_at_recall
+    
     def precision_at_recall_levels(self):
-        pass
+        return [
+            (q, self._compute_p_at_recall(q.relevant, ans)) for q, ans in self.__results
+        ]
 
 
 def main():
@@ -129,6 +145,7 @@ def main():
         print(f"{query.text} {results} p:{precision} r:{recall}")
 
     print(bench.precision_at_r())
+    print(bench.precision_at_recall_levels())
 
 if __name__ == "__main__":
     main()
