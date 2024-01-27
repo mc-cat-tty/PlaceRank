@@ -1,4 +1,4 @@
-from placerank.logic_views import InsideAirbnbSchema
+from placerank.views import InsideAirbnbSchema, DocumentView
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.index import create_in, Index
 from whoosh.analysis import Analyzer
@@ -68,12 +68,12 @@ def populate_index(index_dir: str, analyzer: Analyzer = None):
     ix.close()
 
 
-def load_page(id: str) -> dict:
+def load_page(id: str) -> DocumentView:
     """
     TODO: optimize using in-memory dataset
     """
     with open(CACHE_FILE, 'r') as listings:
-        return InsideAirbnbSchema.get_document_logic_view(
+        return DocumentView.from_record(
             pydash.chain(csv.DictReader(listings.readlines()))
                 .filter(lambda r: r['id'] == id)
                 .value()

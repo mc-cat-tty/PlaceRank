@@ -3,7 +3,7 @@ import functools
 from tkinter import font
 from tkinter.tix import MAIN
 from urwid import *
-from placerank.views import SearchFields, ResultView, QueryView, DocumentLogicView
+from placerank.views import SearchFields, ResultView, QueryView, DocumentView
 from placerank.tui.events import *
 from placerank.tui.presenter import *
 from enum import Enum, auto
@@ -237,7 +237,7 @@ class Window(WidgetWrap):
         self.current_page = self.Page.ADVANCED
         Events.MOVE_FOCUS_TO_SEARCH.value.unregister_observer(self.inner_container_focus_change)
     
-    def _open_result(self, event: Event, doc: DocumentLogicView):
+    def _open_result(self, event: Event, doc: DocumentView):
         if self.current_page == doc['id']: return
 
         self.content_area.original_widget = Padding(
