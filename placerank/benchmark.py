@@ -71,19 +71,63 @@ class Benchmark:
         self.results = self.__results
         #TODO: remove self.results. Now permits inspection of the object without debugger
 
-    def recall(self):
-        recall = lambda r, a: len(set(r) & set(a)) / len(r)
+    def _compute_set_recall(self, relevant, answer):
+        """
+        Returns the recall using set theory for a given answer and relevant list (or set)
+        """
+        return len(set(relevant) & set(answer)) / len(relevant)
+    
+    def _compute_set_precision(self, relevant, answer):
+        """
+        Returns the precision using set theory for a given answer and relevant list (or set)
+        """
+        if len(answer) > 0:
+            return len(set(relevant) & set(answer)) / len(answer)
+        
+        return 0
 
+    def recall(self):
         return [
-            (q, recall(q.relevant, ans)) for q, ans in self.__results
+            (q, self._compute_set_recall(q.relevant, ans)) for q, ans in self.__results
         ]
     
     def precision(self):
-        precision = lambda r, a: len(set(r) & set(a)) / len(a)
-
         return [
-            (q, precision(q.relevant, ans) if len(ans) > 0 else 0)
+            (q, self._compute_set_precision(q.relevant, ans))
             for q, ans in self.__results
+        ]
+    
+    def _compute_precision_at_r(self, relevant, answer):
+        """
+        Compute precision at levels of recall for slices of increasing length of the ans list of answered documents,
+        i.e. at rank r.
+        """
+        ndocs = len(answer)
+
+        return [(self._compute_set_precision(relevant, answer[:i]), self._compute_set_recall(relevant, answer)) for i in range(1, ndocs+1)]
+    
+    def precision_at_r(self):
+        return [
+            (q, [self._compute_precision_at_r(q.relevant, ans)]) for q, ans in self.__results
+        ]
+    
+    def _compute_p_at_recall(self, relevant, answer):
+        """
+        Computes precision at different levels of recall for a given query.
+        """
+
+        p_at_r = self._compute_precision_at_r(relevant, answer)
+        p_at_recall = p_at_r[:1]
+
+        for prev, curr in zip(p_at_r, p_at_r[1:]):
+            if prev[1] < curr[1]:   # if recall increases
+                p_at_recall.append(curr)
+
+        return p_at_recall
+    
+    def precision_at_recall_levels(self):
+        return [
+            (q, self._compute_p_at_recall(q.relevant, ans)) for q, ans in self.__results
         ]
 
 
@@ -99,6 +143,9 @@ def main():
     
     for (query, results), (_q, precision), (__q, recall) in zip(bench.results, bench.precision(), bench.recall()):
         print(f"{query.text} {results} p:{precision} r:{recall}")
+
+    print(bench.precision_at_r())
+    print(bench.precision_at_recall_levels())
 
 if __name__ == "__main__":
     main()
