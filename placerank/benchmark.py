@@ -5,6 +5,7 @@ Module to test performance of an index against predefined queries.
 from placerank.search import index_search
 from whoosh.index import open_dir
 import json
+from operator import itemgetter
 
 def mean(l):
     if len(l) > 0:
@@ -20,8 +21,8 @@ class BenchmarkQuery:
     def __init__(self, row_dict):
         self.__dict__.update(**row_dict)
 
-    def __repr__(self):
-        return f"<BenchmarkQuery {self.uin}, {self.text}, {self.room_type}, {self.relevant}, {self.sentiments}"
+    def __str__(self):
+        return f"<BenchmarkQuery {self.text}>"
 
 
 class BenchmarkDataset:
@@ -149,6 +150,33 @@ class Benchmark:
     
     def mean_average_precision(self):
         return mean([p for q, p in self.average_precision()])
+    
+    def _armonic_mean(self, p, r, p_weight=1, r_weight=1):
+        if p > 0 and r > 0:
+            return (p_weight + r_weight) / (p_weight/p + r_weight/r)
+        else:
+            return 0
+
+    def f1(self):
+        #precisions = filter(itemgetter(1), self.precision())   #can't figure out why it doesn't work
+        #recalls = filter(itemgetter(1), self.recall())
+
+        precisions = [p[1] for p in self.precision()]
+        recalls = [r[1] for r in self.recall()]
+
+        return [
+            (q, self._armonic_mean(p, r))
+            for q, p, r in zip(self.__results, precisions, recalls)
+        ]
+    
+    def e(self, b=1.5):
+        precisions = [p[1] for p in self.precision()]
+        recalls = [r[1] for r in self.recall()]
+
+        return [
+            (q, 1 - self._armonic_mean(p, r, 1, b**2))
+            for q, p, r in zip(self.__results, precisions, recalls)
+        ]
 
 
 def main():
@@ -167,6 +195,8 @@ def main():
     print(bench.precision_at_r())
     print(bench.precision_at_recall_levels())
     #print(bench.average_precision())
+    print(bench.f1())
+    print(bench.e())
 
 if __name__ == "__main__":
     main()
