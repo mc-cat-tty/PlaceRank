@@ -32,6 +32,9 @@ class InsideAirbnbSchema(Schema):
         return {k:record[k] for k in self.logicview.keys()}
 
 class DocumentView(NamedTuple):
+    """
+    Adapter class to a document that instances an immutable tuple
+    """
     id: str
     name: str
     room_type: str
@@ -45,6 +48,9 @@ class DocumentView(NamedTuple):
 
 @verify(NAMED_FLAGS)
 class SearchFields(Flag):
+    """
+    Enumeration of searchable fields
+    """
     NAME = auto()
     ROOM_TYPE = auto()
     DESCRIPTION = auto()
@@ -52,12 +58,18 @@ class SearchFields(Flag):
 
 
 class QueryView(NamedTuple):
+    """
+    Adapter class to a query that instances an immutable tuple
+    """
     textual_query: str
     search_fields: SearchFields = 0
     room_type: str = ''
     sentiment_tags: str = ''
 
 class ResultView(NamedTuple):
+    """
+    Adapter class to a result (hit) that instances an immutable tuple
+    """
     id: str
     name: str
     room_type: str
