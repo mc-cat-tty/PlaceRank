@@ -1,4 +1,5 @@
 from placerank.logic_views import InsideAirbnbSchema
+from sentimentModule.sentiment import GoEmotionsClassifier
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.index import create_in, Index
 from whoosh.analysis import Analyzer
@@ -8,15 +9,18 @@ import os
 import csv
 import gzip
 import sys
+from collections import defaultdict
+import pickle
 
 LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
+REVIEWS_LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/reviews.csv.gz"
 
-def download_dataset_source(storage: io.StringIO) -> io.StringIO:
+def download_dataset_source(storage: io.StringIO, link = LINK) -> io.StringIO:
     """
     Download data of InsideAirbnb and unpacks it in memory.
     """
 
-    r = requests.get(LINK)
+    r = requests.get(link)
     
     if not r.ok:
         raise ConnectionError(f"Error retrieving the dataset source. Server returned status code {r.status}")
@@ -54,5 +58,28 @@ def populate_index(index_dir: str, analyzer: Analyzer = None):
     ix.close()
 
 
+def build_reviews_index():
+    reviews_index = defaultdict(list)
+
+    sent = GoEmotionsClassifier()
+
+    with io.StringIO() as storage, open("reviews.pickle", "w") as fp:
+        download_dataset_source(storage, REVIEWS_LINK)
+
+        print("Downloaded dataset")
+
+        dset = csv.DictReader(storage)
+
+        comments = filter(lambda x: x["comments"], dset)
+        sentiments = sent.classify_texts(list(comments))
+        
+        print(sentiments)
+        storage.seek(0)
+        for row, sent in zip(dset, sentiments):
+            reviews_index[row["listing_id"]].append((row["id"], dset["date"], sent))
+
+        pickle.dump(reviews_index, fp)
+
 if __name__ == "__main__":
-    populate_index(sys.argv[1])
+    #populate_index(sys.argv[1])
+    build_reviews_index()
