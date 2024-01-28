@@ -65,6 +65,13 @@ def create_index(index_dir: str, schema: Schema) -> Index:
 
 
 def populate_index(index_dir: str, local_file: str, remote_url: str = None, analyzer: Analyzer = None):
+    """
+    This function builds the inverted index of the provided dataset.
+    If no local_file is passed, the dataset is downloaded straight from the remote_url.
+    If just the local_file is passed, the dataset is loaded from there.
+    If both argumetns are passed, the dataset is downloaded and stored in the local_file, then the
+    inverted index is created.
+    """
     schema = InsideAirbnbSchema(analyzer)
     ix = create_index(index_dir, schema)
 
