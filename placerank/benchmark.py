@@ -6,6 +6,11 @@ from placerank.search import index_search
 from whoosh.index import open_dir
 import json
 
+def mean(l):
+    if len(l) > 0:
+        return sum(l) / len(l)
+    return 0
+
 class BenchmarkQuery:
     """
     Representation of a benchmark query. Provides access to the UIN, textual query,
@@ -99,8 +104,7 @@ class Benchmark:
     
     def _compute_precision_at_r(self, relevant, answer):
         """
-        Compute precision at levels of recall for slices of increasing length of the ans list of answered documents,
-        i.e. at rank r.
+        Compute precision at ranking r for slices of increasing length of the ans list of answered documents.
         """
         ndocs = len(answer)
 
@@ -129,6 +133,22 @@ class Benchmark:
         return [
             (q, self._compute_p_at_recall(q.relevant, ans)) for q, ans in self.__results
         ]
+    
+    def _compute_average_precision(self, relevant, answer):
+        """
+        TODO: debug
+        """
+        get_precisions = lambda x: [p for p, _ in zip(*x)]
+
+        return mean(get_precisions(self._compute_p_at_recall(relevant, answer)))
+    
+    def average_precision(self):
+        return [
+            (q, self._compute_average_precision(q.relevant, ans)) for q, ans in self.__results
+        ]
+    
+    def mean_average_precision(self):
+        return mean([p for q, p in self.average_precision()])
 
 
 def main():
@@ -146,6 +166,7 @@ def main():
 
     print(bench.precision_at_r())
     print(bench.precision_at_recall_levels())
+    #print(bench.average_precision())
 
 if __name__ == "__main__":
     main()
