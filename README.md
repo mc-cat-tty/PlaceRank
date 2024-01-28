@@ -9,7 +9,8 @@ In order to enjoy our not-so-SOTA search engine, the average user needs to run t
 ```bash
 python3 -m pip install -r requirements.txt
 python3 -m placerank.preprocessing  # Downloads WordNet
-python3 -m placerank.dataset        # Downloads the dataset and builds the index
+# Download the dataset and build the index
+python3 -m placerank.dataset -i index -r http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz -l datasets/ny_listings.csv
 ```
 
 For experienced user, we suggest to firstly crate a virtual environment, where all packages will be installed; then follow the above procedure:
