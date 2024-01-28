@@ -5,18 +5,21 @@ from whoosh.analysis import Analyzer
 import requests
 import io
 import os
+import sys
 import csv
 import gzip
 import pydash
+import argparse
 
-LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
+DEFAULT_URL = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
+DEFAULT_DIR = "index"
 CACHE_FILE = "datasets/listings.csv"
 
 def cached_download(filename: str):
     def decorator(download_function):
-        def inner(storage: io.StringIO):
+        def inner(url, storage: io.StringIO):
             if not os.path.isfile(filename):
-                storage = download_function(storage)
+                storage = download_function(url, storage)
                 with open(filename, 'w') as cache: print(storage.getvalue(), file=cache)
             else:
                 with open(filename, 'r') as cache: storage = io.StringIO(cache.read())
@@ -25,12 +28,12 @@ def cached_download(filename: str):
     return decorator
 
 @cached_download(CACHE_FILE)
-def download_dataset_source(storage: io.StringIO) -> io.StringIO:
+def download_dataset_source(url: str, storage: io.StringIO) -> io.StringIO:
     """
     Download data of InsideAirbnb and unpacks it in memory.
     """
 
-    r = requests.get(LINK)
+    r = requests.get(url)
     
     if not r.ok:
         raise ConnectionError(f"Error retrieving the dataset source. Server returned status code {r.status}")
@@ -53,12 +56,12 @@ def create_index(index_dir: str, schema: Schema) -> Index:
     return ix
 
 
-def populate_index(index_dir: str, analyzer: Analyzer = None):
+def populate_index(index_dir: str = DEFAULT_DIR, remote_url: str = DEFAULT_URL, analyzer: Analyzer = None):
     schema = InsideAirbnbSchema(analyzer)
     ix = create_index(index_dir, schema)
 
     with io.StringIO() as storage, ix.writer() as writer:
-        storage = download_dataset_source(storage)
+        storage = download_dataset_source(remote_url, storage)
 
         dset = csv.DictReader(storage)
 
@@ -82,4 +85,11 @@ def load_page(id: str) -> DocumentView:
 
 
 if __name__ == "__main__":
-    populate_index("index")
+    parser = argparse.ArgumentParser(
+        prog = "Placerank dataset downloader and indexer",
+        description = "Convenience module to download and index a InsideAirBnb dataset"
+    )
+    parser.add_argument('-i', '--index-directory', help = 'Directory in which the index is created')
+    parser.add_argument('-s', '--source-url', help = 'Source URL from which the dataset is downloaded')
+    args = parser.parse_args(sys.argv[1:])  # Exclude module itself from arguments list
+    populate_index(args.index_directory, args.source_url)
