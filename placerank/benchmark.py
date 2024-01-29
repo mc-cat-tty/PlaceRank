@@ -151,7 +151,7 @@ class Benchmark:
     def mean_average_precision(self):
         return mean([p for q, p in self.average_precision()])
     
-    def _armonic_mean(self, p, r, p_weight=1, r_weight=1):
+    def _harmonic_mean(self, p, r, p_weight=1, r_weight=1):
         if p > 0 and r > 0:
             return (p_weight + r_weight) / (p_weight/p + r_weight/r)
         else:
@@ -165,7 +165,7 @@ class Benchmark:
         recalls = [r[1] for r in self.recall()]
 
         return [
-            (q, self._armonic_mean(p, r))
+            (q, self._harmonic_mean(p, r))
             for q, p, r in zip(self.__results, precisions, recalls)
         ]
     
@@ -174,7 +174,7 @@ class Benchmark:
         recalls = [r[1] for r in self.recall()]
 
         return [
-            (q, 1 - self._armonic_mean(p, r, 1, b**2))
+            (q, 1 - self._harmonic_mean(p, r, 1, b**2))
             for q, p, r in zip(self.__results, precisions, recalls)
         ]
 
