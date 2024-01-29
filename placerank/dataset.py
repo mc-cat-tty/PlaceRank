@@ -72,7 +72,7 @@ def build_reviews_index(link: str = REVIEWS_LINK):
 
     sent = GoEmotionsClassifier()
 
-    with open("reviews", "r+") as storage, open("reviews.pickle", "w") as fp:
+    with open("reviews", "r+") as storage, open("reviews.pickle", "bw") as fp:
         #download_dataset_source(storage, link)
 
         print("Downloaded dataset")
@@ -98,7 +98,7 @@ def build_reviews_index(link: str = REVIEWS_LINK):
 
 
 def load_reviews_index():
-    with open("reviews.pickle", "r") as fp:
+    with open("reviews.pickle", "rb") as fp:
         reviews_index = pickle.load(fp)
 
     return reviews_index
