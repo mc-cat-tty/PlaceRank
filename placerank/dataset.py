@@ -13,7 +13,7 @@ from collections import defaultdict
 import pickle
 
 LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
-REVIEWS_LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/reviews.csv.gz"
+REVIEWS_LINK = "http://data.insideairbnb.com/united-states/ma/cambridge/2023-12-26/data/reviews.csv.gz"
 
 def download_dataset_source(storage: io.StringIO, link = LINK) -> io.StringIO:
     """
@@ -58,6 +58,13 @@ def populate_index(index_dir: str, analyzer: Analyzer = None):
     ix.close()
 
 
+def preprocess_comment(comment: str) -> str:
+    """
+    Returns up to the first 512 characters of the comment.
+    """
+    return comment[:512]
+
+
 def build_reviews_index():
     reviews_index = defaultdict(list)
 
@@ -70,15 +77,19 @@ def build_reviews_index():
 
         dset = csv.DictReader(storage)
 
-        comments = filter(lambda x: x["comments"], dset)
-        sentiments = sent.classify_texts(list(comments))
-        
-        print(sentiments)
-        storage.seek(0)
-        for row, sent in zip(dset, sentiments):
-            reviews_index[row["listing_id"]].append((row["id"], dset["date"], sent))
+        for row in dset:
+            comment = preprocess_comment(row["comments"])
+            reviews_index[row["listing_id"]].append((row["id"], row["date"], sent.classify_texts(comment)))
 
         pickle.dump(reviews_index, fp)
+
+
+def load_reviews_index():
+    with open("reviews.pickle", "r") as fp:
+        reviews_index = pickle.load(fp)
+
+    return reviews_index
+
 
 if __name__ == "__main__":
     #populate_index(sys.argv[1])
