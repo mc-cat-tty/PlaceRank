@@ -97,13 +97,6 @@ def build_reviews_index(link: str = REVIEWS_LINK):
         pickle.dump(reviews_index, fp)
 
 
-def load_reviews_index():
-    with open("reviews.pickle", "rb") as fp:
-        reviews_index = pickle.load(fp)
-
-    return reviews_index
-
-
 if __name__ == "__main__":
     #populate_index(sys.argv[1])
     build_reviews_index()
