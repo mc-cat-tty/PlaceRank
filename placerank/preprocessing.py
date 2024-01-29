@@ -68,11 +68,13 @@ def get_default_analyzer() -> Analyzer:
 
   return ANALYZER_NAIVE
 
-
-def main():
+def setup():
     nltk.download("wordnet")
     nltk.download('averaged_perceptron_tagger')
 
+def main():
+    setup()
+    
     analyzer = get_default_analyzer()
     preproc = lambda s: print(*[t.text for t in analyzer(s)], sep='\n')
     preproc(u"This is an amazing Whoosh experience, I'm loving it")

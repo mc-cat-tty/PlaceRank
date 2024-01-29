@@ -31,7 +31,6 @@ from typing import List
 from whoosh.qparser import QueryParser
 
 
-
 class IRModel(ABC):
     def __init__(
         self,
