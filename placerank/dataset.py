@@ -11,6 +11,8 @@ import gzip
 import sys
 from collections import defaultdict
 import pickle
+from operator import itemgetter
+from itertools import islice
 
 LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
 REVIEWS_LINK = "http://data.insideairbnb.com/united-states/ma/cambridge/2023-12-26/data/reviews.csv.gz"
@@ -65,21 +67,32 @@ def preprocess_comment(comment: str) -> str:
     return comment[:512]
 
 
-def build_reviews_index():
+def build_reviews_index(link: str = REVIEWS_LINK):
     reviews_index = defaultdict(list)
 
     sent = GoEmotionsClassifier()
 
-    with io.StringIO() as storage, open("reviews.pickle", "w") as fp:
-        download_dataset_source(storage, REVIEWS_LINK)
+    with open("reviews", "r+") as storage, open("reviews.pickle", "w") as fp:
+        #download_dataset_source(storage, link)
 
         print("Downloaded dataset")
 
         dset = csv.DictReader(storage)
 
-        for row in dset:
-            comment = preprocess_comment(row["comments"])
-            reviews_index[row["listing_id"]].append((row["id"], row["date"], sent.classify_texts(comment)))
+        with open("reviews", "r") as comments_storage:
+            comments_set = csv.DictReader(comments_storage)
+            comments = map(preprocess_comment, map(itemgetter("comments"), comments_set))
+
+            while True:
+                next_comments = islice(comments, 10000)
+                next_sentiment = sent.classify_texts(list(next_comments))
+
+                if not next_sentiment:
+                    break
+
+                for row, sentiment in zip(dset, next_sentiment):
+                    print(row["id"])
+                    reviews_index[row["listing_id"]].append((row["id"], row["date"], sentiment))
 
         pickle.dump(reviews_index, fp)
 
