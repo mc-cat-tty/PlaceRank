@@ -167,3 +167,4 @@ index
 
 # Ignore big CSV files
 datasets/*.csv
+*cache*
