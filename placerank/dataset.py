@@ -13,6 +13,7 @@ from collections import defaultdict
 import pickle
 from operator import itemgetter
 from itertools import islice
+from datetime import datetime
 
 LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
 REVIEWS_LINK = "http://data.insideairbnb.com/united-states/ma/cambridge/2023-12-26/data/reviews.csv.gz"
@@ -60,6 +61,28 @@ def populate_index(index_dir: str, analyzer: Analyzer = None):
     ix.close()
 
 
+class ReviewsDict:
+    """
+    Represent a Reviews file as a dictionary. Decodes CSV, preprocess text for BERT compatibility and
+    filter the latest 10 reviews for each listing.
+    """
+
+    def __init__(self, fp):
+        self.csvdictreader = csv.DictReader(fp)
+
+    def __todate(self, s: str):
+        return datetime.strptime(s, "%Y-%m-%d")
+    
+    def __iter__(self):
+        sortedreviews = sorted(self.csvdictreader, key=lambda x: (int(x.get("listing_id") ), x.get("date") ), reverse=True)
+        mapped_to_dict = map(
+            lambda comment: {"listing_id": int(comment.get("listing_id")), "date": self.__todate(comment.get("date")), "id": comment.get("id")},
+            sortedreviews
+        )
+
+        return mapped_to_dict
+
+
 def preprocess_comment(comment: str) -> str:
     """
     Returns up to the first 512 characters of the comment.
@@ -92,11 +115,18 @@ def build_reviews_index(link: str = REVIEWS_LINK):
 
                 for row, sentiment in zip(dset, next_sentiment):
                     print(row["id"])
-                    reviews_index[row["listing_id"]].append((row["id"], row["date"], sentiment))
+                    reviews_index[int(row["listing_id"])].append((int(row["id"]), row["date"], sentiment))
 
         pickle.dump(reviews_index, fp)
 
 
 if __name__ == "__main__":
     #populate_index(sys.argv[1])
-    build_reviews_index()
+    #build_reviews_index()
+    with open("reviews", "r+") as storage:
+        r = ReviewsDict(storage)
+        first10 = islice(r, 10)
+
+        for x in first10:
+            print(x)
+
