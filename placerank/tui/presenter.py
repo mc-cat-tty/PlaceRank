@@ -24,8 +24,9 @@ class Presenter:
             cls.__instance = super().__new__(cls)
         return cls.__instance
 
-    def __init__(self, model: IRModel):
+    def __init__(self, model: IRModel, local_dataset: str):
         self._model = model
+        self._local_dataset = local_dataset
         self.search_observser = Observer(self.search_query_update, [Events.SEARCH_QUERY_UPDATE.value])
         self.open_result_request_observer = Observer(self.open_result_request, [Events.OPEN_RESULT_REQUEST.value])
     
@@ -33,4 +34,4 @@ class Presenter:
         Events.SEARCH_RESULTS_UPDATE.value.notify(self._model.search(query))
 
     def open_result_request(self, event: Event, doc_id: int) -> None:
-        Events.OPEN_RESULT.value.notify(load_page(doc_id))
+        Events.OPEN_RESULT.value.notify(load_page(self._local_dataset, doc_id))
