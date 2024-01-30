@@ -37,8 +37,8 @@ class IRModel(ABC):
         index: Index,
         weighting_model: WeightingModel = BM25F,
     ):
-        self._spell_corrector = spell_corrector(self)
-        self._query_expander = query_expander
+        self.spell_corrector = spell_corrector(self)
+        self.query_expander = query_expander
         self.index = index
         self.weighting_model = weighting_model
 
@@ -46,8 +46,8 @@ class IRModel(ABC):
         return qparser.MultifieldParser([i.name.lower() for i in query.search_fields], self.index.schema)
     
     def search(self, query: QueryView) -> List[ResultView]:
-        corrected_query = self._spell_corrector.correct(query.textual_query)
-        expanded_query = self._query_expander.expand(corrected_query)
+        corrected_query = self.spell_corrector.correct(query)
+        expanded_query = self.query_expander.expand(corrected_query)
         
         parser = self.get_query_parser(query)
         query = parser.parse(expanded_query)
@@ -69,11 +69,11 @@ class NoSpellCorrection(SpellCorrectionService):
         return query
 
 class WhooshSpellCorrection(SpellCorrectionService):
-    def correct(self, query: str) -> str:
-        parser = self._ir_model.get_query_parser()
-        parsed_query = parser.parse(query)
+    def correct(self, query: QueryView) -> str:
+        parser = self._ir_model.get_query_parser(query)
+        parsed_query = parser.parse(query.textual_query)
         
         with self._ir_model.index.searcher() as s:
-            corrected_query = s.correct_query(parsed_query, query)
+            corrected_query = s.correct_query(parsed_query, query.textual_query)
 
-        return corrected_query
+        return corrected_query.string

@@ -19,7 +19,7 @@ def main() -> None:
         window = Window(readme.read())
     
     idx = open_dir("index")
-    model = IRModel(NoSpellCorrection, NoQueryExpansion(), idx)
+    model = IRModel(WhooshSpellCorrection, NoQueryExpansion(), idx)
     presenter = Presenter(model, DATASET_CACHE_FILE)
     loop = MainLoop(window, palette=PALETTE)
     loop.run()
