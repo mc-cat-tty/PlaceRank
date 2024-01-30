@@ -1,6 +1,8 @@
-from typing import Dict, List, Tuple
+from __future__ import annotations
+from typing import Dict, NamedTuple
 from placerank.preprocessing import get_default_analyzer
 from whoosh.fields import FieldType, Schema, ID, TEXT, KEYWORD
+from enum import Flag, auto, verify, NAMED_FLAGS
 from datetime import datetime
 from operator import itemgetter
 from collections import defaultdict
@@ -33,6 +35,49 @@ class InsideAirbnbSchema(Schema):
         The required keys are specified in `self.logicview`.
         """
         return {k:record[k] for k in self.logicview.keys()}
+
+class DocumentView(NamedTuple):
+    """
+    Adapter class to a document that instances an immutable tuple
+    """
+    id: str
+    name: str
+    room_type: str
+    description: str
+    neighborhood_overview: str
+
+    @staticmethod
+    def from_record(record: dict) -> DocumentView:
+      return {k: record[k] for k in DocumentView._fields}
+
+
+@verify(NAMED_FLAGS)
+class SearchFields(Flag):
+    """
+    Enumeration of searchable fields
+    """
+    NAME = auto()
+    ROOM_TYPE = auto()
+    DESCRIPTION = auto()
+    NEIGHBORHOOD_OVERVIEW = auto()
+
+
+class QueryView(NamedTuple):
+    """
+    Adapter class to a query that instances an immutable tuple
+    """
+    textual_query: str
+    search_fields: SearchFields = 0
+    room_type: str = ''
+    sentiment_tags: str = ''
+
+class ResultView(NamedTuple):
+    """
+    Adapter class to a result (hit) that instances an immutable tuple
+    """
+    id: str
+    name: str
+    room_type: str
 
 
 class ReviewsIndex:
@@ -93,8 +138,3 @@ class ReviewsIndex:
                 sentiment_vector[k] = v / len(sentiments)
 
         return sentiment_vector
-
-if __name__ == "__main__":
-    ix = ReviewsIndex()
-    print(ix.get_sentiment_for('757175885529058316'))
-    print(ix.get_mean_sentiment_for('757175885529058316'))

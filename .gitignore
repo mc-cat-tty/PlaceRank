@@ -164,3 +164,7 @@ cython_debug/
 
 # Ignore Whoosh index
 index
+
+# Ignore big CSV files
+datasets/*.csv
+*cache*
