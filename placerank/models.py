@@ -62,7 +62,7 @@ class QueryExpansionService(ABC):
         ...
 
 
-class QueryExpansionMock(QueryExpansionService):
+class NoQueryExpansionService(QueryExpansionService):
     """
     A mock object that does nothing on the query
     """

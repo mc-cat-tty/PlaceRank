@@ -4,8 +4,13 @@ This module implements different strategies of search for a given index.
 
 from whoosh.searching import Results
 from whoosh.qparser import MultifieldParser
+from whoosh.index import Index
 from whoosh.scoring import TF_IDF, BM25F, FunctionWeighting, Frequency, WeightingModel, WeightScorer
 from typing import Set
+from placerank.models import RetrievalModel
+
+class BinaryRetrievalModel:
+    def __init__(self, index: Index)
 
 
 def boolean_search(ix, query: str) -> set[int]:
