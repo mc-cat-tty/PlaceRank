@@ -18,6 +18,8 @@ from datetime import datetime
 LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
 REVIEWS_LINK = "http://data.insideairbnb.com/united-states/ma/cambridge/2023-12-26/data/reviews.csv.gz"
 
+BATCH_SIZE = 100
+
 def download_dataset_source(storage: io.StringIO, link = LINK) -> io.StringIO:
     """
     Download data of InsideAirbnb and unpacks it in memory.
@@ -69,18 +71,22 @@ class ReviewsDict:
 
     def __init__(self, fp):
         self.csvdictreader = csv.DictReader(fp)
+        self.__iterobj = None
 
     def __todate(self, s: str):
         return datetime.strptime(s, "%Y-%m-%d")
     
     def __iter__(self):
+        if self.__iterobj:
+            return self.__iterobj
+        
         sortedreviews = sorted(self.csvdictreader, key=lambda x: (int(x.get("listing_id") ), x.get("date") ), reverse=True)
-        mapped_to_dict = map(
-            lambda comment: {"listing_id": int(comment.get("listing_id")), "date": self.__todate(comment.get("date")), "id": comment.get("id")},
+        self.__iterobj = map(
+            lambda row: {"listing_id": int(row.get("listing_id")), "date": self.__todate(row.get("date")), "id": row.get("id"), "comments": row.get("comments")},
             sortedreviews
         )
 
-        return mapped_to_dict
+        return self.__iterobj
 
 
 def preprocess_comment(comment: str) -> str:
@@ -100,33 +106,24 @@ def build_reviews_index(link: str = REVIEWS_LINK):
 
         print("Downloaded dataset")
 
-        dset = csv.DictReader(storage)
+        dset = ReviewsDict(storage)
 
-        with open("reviews", "r") as comments_storage:
-            comments_set = csv.DictReader(comments_storage)
-            comments = map(preprocess_comment, map(itemgetter("comments"), comments_set))
+        while True:
+            nextbatch = [r for r in islice(dset, BATCH_SIZE)]
+            
+            if not nextbatch:
+                break
 
-            while True:
-                next_comments = islice(comments, 10000)
-                next_sentiment = sent.classify_texts(list(next_comments))
+            comments = map(preprocess_comment, map(itemgetter("comments"), nextbatch))
+            sentiments = sent.classify_texts(list(comments))
 
-                if not next_sentiment:
-                    break
-
-                for row, sentiment in zip(dset, next_sentiment):
-                    print(row["id"])
-                    reviews_index[int(row["listing_id"])].append((int(row["id"]), row["date"], sentiment))
+            for row, sentiment in zip(nextbatch, sentiments):
+                print(row.get("id"))
+                reviews_index[int(row["listing_id"])].append((int(row["id"]), row["date"], sentiment))
 
         pickle.dump(reviews_index, fp)
 
 
 if __name__ == "__main__":
     #populate_index(sys.argv[1])
-    #build_reviews_index()
-    with open("reviews", "r+") as storage:
-        r = ReviewsDict(storage)
-        first10 = islice(r, 10)
-
-        for x in first10:
-            print(x)
-
+    build_reviews_index()
