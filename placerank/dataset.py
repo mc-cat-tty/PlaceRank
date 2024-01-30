@@ -18,7 +18,7 @@ from datetime import datetime
 LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
 REVIEWS_LINK = "http://data.insideairbnb.com/united-states/ma/cambridge/2023-12-26/data/reviews.csv.gz"
 
-BATCH_SIZE = 100
+BATCH_SIZE = 10000
 
 def download_dataset_source(storage: io.StringIO, link = LINK) -> io.StringIO:
     """
@@ -69,22 +69,37 @@ class ReviewsDict:
     filter the latest 10 reviews for each listing.
     """
 
+    LAST_REVIEWS = 10
+
     def __init__(self, fp):
         self.csvdictreader = csv.DictReader(fp)
         self.__iterobj = None
+        self.__last_id = 0
+        self.__counter = 0
 
-    def __todate(self, s: str):
+    @staticmethod
+    def __todate(s: str):
         return datetime.strptime(s, "%Y-%m-%d")
+    
+    def __filter_first(self, row):
+        if row.get("listing_id") != self.__last_id:
+            self.__last_id = row.get("listing_id")
+            self.__counter = 0
+
+        if self.__counter < self.LAST_REVIEWS:
+            self.__counter += 1
+            
+            return True
+
+        return False
     
     def __iter__(self):
         if self.__iterobj:
             return self.__iterobj
         
-        sortedreviews = sorted(self.csvdictreader, key=lambda x: (int(x.get("listing_id") ), x.get("date") ), reverse=True)
-        self.__iterobj = map(
-            lambda row: {"listing_id": int(row.get("listing_id")), "date": self.__todate(row.get("date")), "id": row.get("id"), "comments": row.get("comments")},
-            sortedreviews
-        )
+        converted_types = map(lambda x: x | {"listing_id": int(x["listing_id"]), "id": int(x["id"]), "date": ReviewsDict.__todate(x["date"])}, self.csvdictreader)
+        sortedreviews = sorted(converted_types, key=lambda x: (x.get("listing_id"), x.get("date") ), reverse=True)
+        self.__iterobj = filter(self.__filter_first, sortedreviews)
 
         return self.__iterobj
 
@@ -102,7 +117,7 @@ def build_reviews_index(link: str = REVIEWS_LINK):
     sent = GoEmotionsClassifier()
 
     with open("reviews", "r+") as storage, open("reviews.pickle", "bw") as fp:
-        #download_dataset_source(storage, link)
+        download_dataset_source(storage, link)
 
         print("Downloaded dataset")
 
@@ -127,3 +142,9 @@ def build_reviews_index(link: str = REVIEWS_LINK):
 if __name__ == "__main__":
     #populate_index(sys.argv[1])
     build_reviews_index()
+
+    #with open("reviews", "r") as fp:
+    #    a = ReviewsDict(fp)
+
+    #    x = islice(a, 200)
+    #    print(*[b for b in x], sep="\n")
