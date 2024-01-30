@@ -124,13 +124,13 @@ class LLMQueryExpansionService(QueryExpansionService):
         masked = ' '.join(tmp)
         return masked
 
-    def expand(self, query: str, max_results: int = 5, confidence_threshold: float = 0) -> str:
+    def expand(self, query: str, max_results: int = 3, confidence_threshold: float = 0.9, overprediction: int = 5) -> str:
         tokens = self._tokenize(query)
         query_embedding = self._get_embedding(query)
         expanded_query = ""
        
         for idx, token in enumerate(tokens):
-            candidates = self.unmasker(self._mask_token(['[CLS] '] + tokens + [' [SEP]'], idx+1), top_k = max_results*10)
+            candidates = self.unmasker(self._mask_token(['[CLS] '] + tokens + [' [SEP]'], idx+1), top_k = max_results*overprediction)
 
             similarities = (
                 pydash.chain(candidates)
@@ -151,7 +151,7 @@ class LLMQueryExpansionService(QueryExpansionService):
                     .value()
             )
             
-            expanded_query += f" {token} {' '.join(expansions)}"
+            expanded_query += " " + ' '.join(set(expansions + [token]))
 
         return expanded_query
 
@@ -163,7 +163,7 @@ def main():
     query = 'modern shared room near Harvard.'
     print(f'{query=}')
     print(qe_wn.expand('modern shared room near Harvard.', 3, 0.9))
-    print(qe_bert.expand('modern shared room near Harvard.', 3, 0.9))
+    print(qe_bert.expand('modern shared room near Harvard.', 3, 0.9, 5))
 
 if __name__ == '__main__':
     main()
