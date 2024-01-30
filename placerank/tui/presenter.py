@@ -13,7 +13,9 @@ from placerank.models import IRModel
 from placerank.tui.events import Event, Events, Observer
 from placerank.views import QueryView, ResultView
 from placerank.dataset import load_page
-from typing import Any
+
+from whoosh.index import Index
+from whoosh import qparser
 
 
 class Presenter:
@@ -31,7 +33,9 @@ class Presenter:
         self.open_result_request_observer = Observer(self.open_result_request, [Events.OPEN_RESULT_REQUEST.value])
     
     def search_query_update(self, event: Event, query: QueryView) -> None:
-        Events.SEARCH_RESULTS_UPDATE.value.notify(self._model.search(query))
+        results = self._model.search(query)
+        # Events.DID_YOU_MEAN.value.notify(q)
+        Events.SEARCH_RESULTS_UPDATE.value.notify(results)
 
     def open_result_request(self, event: Event, doc_id: int) -> None:
         Events.OPEN_RESULT.value.notify(load_page(self._local_dataset, doc_id))

@@ -16,10 +16,10 @@ class InsideAirbnbSchema(Schema):
 
         self.logicview: Dict[str, FieldType] = {
             "id": ID(stored = True, unique=True),
-            "name": TEXT(stored = True, field_boost=1.5),
+            "name": TEXT(stored = True, field_boost=1.5, spelling=True),
             "room_type": KEYWORD(stored=True, lowercase=True),
-            "description": TEXT(analyzer=get_default_analyzer()),
-            "neighborhood_overview": TEXT(analyzer=get_default_analyzer())
+            "description": TEXT(analyzer=get_default_analyzer(), spelling=True),
+            "neighborhood_overview": TEXT(analyzer=get_default_analyzer(), spelling=True)
         }
         
         super().__init__(**self.logicview)

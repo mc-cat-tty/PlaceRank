@@ -4,8 +4,7 @@ from operator import itemgetter
 from huggingface_hub import snapshot_download
 from nltk.corpus import wordnet as wn
 from transformers import BertTokenizer, BertModel, BertForMaskedLM, FillMaskPipeline
-
-from placerank.models import QueryExpansionService
+from abc import ABC, abstractmethod
 
 
 def setup(repo_ids: List[str], cache_dir: str):
@@ -14,8 +13,29 @@ def setup(repo_ids: List[str], cache_dir: str):
     nltk.download("wordnet")
 
 
+class QueryExpansionService(ABC):
+    """
+    A class that implements a query expansion service.
+    Exposes the `expand` method.
+    """
 
-class ThesaurusQueryExpansionService(QueryExpansionService):
+    @abstractmethod
+    def expand(query: str) -> str:
+        ...
+
+
+class NoQueryExpansion(QueryExpansionService):
+    """
+    A mock object that does nothing on the query
+    """
+    def expand(self, query: str) -> str:
+        return query
+
+
+class ThesaurusQueryExpansion(QueryExpansionService):
+    """
+    A WordNet-based - aka thesaurus-based - query expansion service.
+    """
     def __init__(self, hf_cache: str):
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', cache_dir = hf_cache)
         self.encoder = BertModel.from_pretrained('bert-base-uncased', output_hidden_states = True, cache_dir = hf_cache)
@@ -82,7 +102,10 @@ class ThesaurusQueryExpansionService(QueryExpansionService):
 
         return expanded_query
 
-class LLMQueryExpansionService(QueryExpansionService):
+class LLMQueryExpansion(QueryExpansionService):
+    """
+    A BERT-based - aka LLM-based - query expansion service.
+    """
     def __init__(self, hf_cache: str):
         self.tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', cache_dir = hf_cache)
         self.encoder_model = BertModel.from_pretrained('bert-base-uncased', output_hidden_states = True, cache_dir = hf_cache)
@@ -157,8 +180,8 @@ class LLMQueryExpansionService(QueryExpansionService):
 
 
 def main():
-    qe_wn = ThesaurusQueryExpansionService('hf_cache')
-    qe_bert = LLMQueryExpansionService('hf_cache')
+    qe_wn = ThesaurusQueryExpansion('hf_cache')
+    qe_bert = LLMQueryExpansion('hf_cache')
 
     query = 'modern shared room near Harvard.'
     print(f'{query=}')

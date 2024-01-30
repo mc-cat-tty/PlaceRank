@@ -1,8 +1,8 @@
 from placerank.tui.components import *
 from placerank.tui.events import *
 from placerank.tui.presenter import *
+from placerank.query_expansion import *
 from placerank.models import *
-from placerank.preprocessing import get_default_analyzer
 from placerank.config import HELP_FILENAME, DATASET_CACHE_FILE
 from whoosh.index import open_dir
 from urwid import MainLoop, ExitMainLoop
@@ -19,7 +19,8 @@ def main() -> None:
         window = Window(readme.read())
     
     idx = open_dir("index")
-    presenter = Presenter(IRModelDumb(get_default_analyzer(), None, RetrievalModelDumb(idx, None)), DATASET_CACHE_FILE)
+    model = IRModel(NoSpellCorrection, NoQueryExpansion(), idx)
+    presenter = Presenter(model, DATASET_CACHE_FILE)
     loop = MainLoop(window, palette=PALETTE)
     loop.run()
 

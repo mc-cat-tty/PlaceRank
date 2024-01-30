@@ -19,69 +19,61 @@ This module contains the definition of a `IRModel`, aka a search engine stack:
     - [ranking]
 """
 from __future__ import annotations
-from dataclasses import dataclass
-from operator import index
-from placerank.views import ResultView, QueryView
 from abc import ABC, abstractmethod
-from whoosh.analysis.analyzers import CompositeAnalyzer
 from whoosh.scoring import WeightingModel
-from whoosh.searching import Results
 from whoosh.index import Index
-from typing import List
-from whoosh.qparser import QueryParser
+from whoosh.scoring import BM25F
+from whoosh import qparser
+from typing import List, Type
 
+from placerank.views import ResultView, QueryView
+from placerank.query_expansion import QueryExpansionService
 
 class IRModel(ABC):
     def __init__(
         self,
-        query_expansion_service: QueryExpansionService,
-        preprocessing_pipeline: CompositeAnalyzer,
-        retrieval_model: RetrievalModel
+        spell_corrector: Type[SpellCorrectionService],
+        query_expander: QueryExpansionService,
+        index: Index,
+        weighting_model: WeightingModel = BM25F,
     ):
-        self._tolerant_retrieval_service = query_expansion_service
-        self._preprocessing_pipeline = preprocessing_pipeline
-        self._retrieval_model = retrieval_model
+        self._spell_corrector = spell_corrector(self)
+        self._query_expander = query_expander
+        self.index = index
+        self.weighting_model = weighting_model
 
+    def get_query_parser(self, query: QueryView) -> qparser.QueryParser:
+        return qparser.MultifieldParser([i.name.lower() for i in query.search_fields], self.index.schema)
     
-    @abstractmethod
     def search(self, query: QueryView) -> List[ResultView]:
-        ...
+        corrected_query = self._spell_corrector.correct(query.textual_query)
+        expanded_query = self._query_expander.expand(corrected_query)
+        
+        parser = self.get_query_parser(query)
+        query = parser.parse(expanded_query)
+        with self.index.searcher(weighting = self.weighting_model) as s:
+            hits = [ResultView(**hit) for hit in s.search(query)]
 
-class IRModelDumb(IRModel):
-    def search(self, query):
-        return self._retrieval_model.search(query)
+        return hits
 
-class QueryExpansionService(ABC):
-    """
-    A service that implements a query expansion service.
-    Exposes the `expand` method.
-    """
+class SpellCorrectionService(ABC):
+    def __init__(self, ir_model: IRModel):
+        self._ir_model = ir_model
 
     @abstractmethod
-    def expand(query: str) -> str:
+    def correct(self, query: str) -> str:
         ...
 
-
-class NoQueryExpansionService(QueryExpansionService):
-    """
-    A mock object that does nothing on the query
-    """
-    def expand(query: str) -> str:
+class NoSpellCorrection(SpellCorrectionService):
+    def correct(self, query: str) -> str:
         return query
 
+class WhooshSpellCorrection(SpellCorrectionService):
+    def correct(self, query: str) -> str:
+        parser = self._ir_model.get_query_parser()
+        parsed_query = parser.parse(query)
+        
+        with self._ir_model.index.searcher() as s:
+            corrected_query = s.correct_query(parsed_query, query)
 
-class RetrievalModel(ABC):
-    def __init__(self, index: Index, weighting_model: WeightingModel):
-        self._index = index
-        self._weighting_model = weighting_model
-
-    @abstractmethod
-    def search(self, query: str) -> Results:
-        ...
-
-class RetrievalModelDumb(RetrievalModel):
-    def search(self, query: QueryView) -> List[ResultView]:
-        parser = QueryParser("neighborhood_overview", self._index.schema)
-        query = parser.parse(query.textual_query)
-        with self._index.searcher() as s:
-            return [ResultView(**hit) for hit in s.search(query)]
+        return corrected_query
