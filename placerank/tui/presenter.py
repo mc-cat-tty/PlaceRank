@@ -11,9 +11,9 @@ model being injected as a dependency in it.
 from __future__ import annotations
 from placerank.models import IRModel
 from placerank.tui.events import Event, Events, Observer
-from placerank.views import QueryView, ResultView
+from placerank.views import DocumentView, QueryView, ResultView
 from placerank.dataset import load_page
-from typing import Any
+import re
 
 
 class Presenter:
@@ -27,6 +27,7 @@ class Presenter:
     def __init__(self, model: IRModel, local_dataset: str):
         self._model = model
         self._local_dataset = local_dataset
+        self._line_break_regex = re.compile(r'\s*<\s*br\s*/?>\s*')
         self.search_observser = Observer(self.search_query_update, [Events.SEARCH_QUERY_UPDATE.value])
         self.open_result_request_observer = Observer(self.open_result_request, [Events.OPEN_RESULT_REQUEST.value])
     
@@ -34,4 +35,6 @@ class Presenter:
         Events.SEARCH_RESULTS_UPDATE.value.notify(self._model.search(query))
 
     def open_result_request(self, event: Event, doc_id: int) -> None:
-        Events.OPEN_RESULT.value.notify(load_page(self._local_dataset, doc_id))
+        page = load_page(self._local_dataset, doc_id)
+        cleaned_page = DocumentView(*(self._line_break_regex.sub('\n', field) if type(field) is str else field for field in page))
+        Events.OPEN_RESULT.value.notify(cleaned_page)

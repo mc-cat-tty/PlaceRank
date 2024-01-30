@@ -48,7 +48,7 @@ class DocumentView(NamedTuple):
 
     @staticmethod
     def from_record(record: dict) -> DocumentView:
-      return {k: record[k] for k in DocumentView._fields}
+      return DocumentView(**{k: record[k] for k in DocumentView._fields})
 
 
 @verify(NAMED_FLAGS)
