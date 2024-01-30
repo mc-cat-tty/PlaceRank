@@ -196,8 +196,12 @@ def main():
     parser.add_argument('-i', '--index-directory', required = True, help = 'Directory in which the index is created')
     parser.add_argument('-l', '---local-file', required = True, help = 'Path to local file. Download destination if dataset is not there, otherwise used as a local cache')
     parser.add_argument('-r', '--remote-url', help = 'Source URL from which the dataset is downloaded. Omit it if you want to use the local copy on your disk.')
+    parser.add_argument('-j', '--review-index', action = "store_true", help = 'Build the reviews index.')
     
     args = parser.parse_args(sys.argv[1:])  # Exclude module itself from arguments list
+
+    if args.review_index:
+        build_reviews_index()
 
     populate_index(args.index_directory, args.local_file, args.remote_url)
 
