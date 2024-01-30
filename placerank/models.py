@@ -34,12 +34,12 @@ from whoosh.qparser import QueryParser
 class IRModel(ABC):
     def __init__(
         self,
+        query_expansion_service: QueryExpansionService,
         preprocessing_pipeline: CompositeAnalyzer,
-        tolerant_retrieval_service: TolerantRetrievalService,
         retrieval_model: RetrievalModel
     ):
+        self._tolerant_retrieval_service = query_expansion_service
         self._preprocessing_pipeline = preprocessing_pipeline
-        self._tolerant_retrieval_service = tolerant_retrieval_service
         self._retrieval_model = retrieval_model
 
     
@@ -51,16 +51,18 @@ class IRModelDumb(IRModel):
     def search(self, query):
         return self._retrieval_model.search(query)
 
-class TolerantRetrievalService(ABC):
+class QueryExpansionService(ABC):
     """
-    
+    A service that implements a query expansion service.
+    Exposes the `expand` method.
     """
+
     @abstractmethod
     def expand(query: str) -> str:
         ...
 
 
-class TolerantRetrievalMock(TolerantRetrievalService):
+class QueryExpansionMock(QueryExpansionService):
     """
     A mock object that does nothing on the query
     """
