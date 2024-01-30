@@ -1,6 +1,5 @@
 from __future__ import annotations
 import functools
-from tkinter.tix import MAIN
 from urwid import *
 from placerank.views import SearchFields, ResultView, QueryView, DocumentView
 from placerank.tui.events import *
@@ -199,8 +198,8 @@ class Controls(WidgetWrap):
         self.btns = (self.advanced, self.help, self.exit)
         self.controls = Columns((
                 ('weight', 35, Divider()),
-                ('weight', 10, AttrMap(self.advanced, None, focus_map='reversed')),
-                ('weight', 6, Divider()),
+                # ('weight', 10, AttrMap(self.advanced, None, focus_map='reversed')),
+                # ('weight', 6, Divider()),
                 ('weight', 10, AttrMap(self.help, None, focus_map='reversed')),
                 ('weight', 6, Divider()),
                 ('weight', 10, AttrMap(self.exit, None, focus_map='reversed')),
@@ -227,7 +226,7 @@ class Window(WidgetWrap):
             '''Full-text search engine for AirBnB listings with support for sentiment tagging and contextual query expansion.\n'''
             '''Try it yourself with queries like: "Manhattan apartment with amazing skyline view", "Row house nearby Brooklyn Bridge", "Cheap room in dangerous block"'''
         )
-        self.current_page: int | self.Page = MAIN
+        self.current_page: int | self.Page = self.Page.MAIN
 
         # COMPONENTS
         self.description = Text(self.main_description_txt)

@@ -20,6 +20,7 @@ This module contains the definition of a `IRModel`, aka a search engine stack:
 """
 from __future__ import annotations
 from abc import ABC, abstractmethod
+from enum import auto
 from whoosh.scoring import WeightingModel
 from whoosh.index import Index
 from whoosh.scoring import BM25F
@@ -45,9 +46,11 @@ class IRModel(ABC):
     def get_query_parser(self, query: QueryView) -> qparser.QueryParser:
         return qparser.MultifieldParser([i.name.lower() for i in query.search_fields], self.index.schema)
     
-    def search(self, query: QueryView) -> List[ResultView]:
+    def search(self, query: QueryView, autoexpansion: bool = False) -> List[ResultView]:
+        expanded_query = self.query_expander.expand(query.textual_query)
+
         parser = self.get_query_parser(query)
-        query = parser.parse(query.textual_query)
+        query = parser.parse(query.textual_query if autoexpansion else query.textual_query)
         with self.index.searcher(weighting = self.weighting_model) as s:
             hits = [ResultView(**hit) for hit in s.search(query)]
 
@@ -58,12 +61,12 @@ class SpellCorrectionService(ABC):
         self._ir_model = ir_model
 
     @abstractmethod
-    def correct(self, query: str) -> str:
+    def correct(self, query: QueryView) -> str:
         ...
 
 class NoSpellCorrection(SpellCorrectionService):
-    def correct(self, query: str) -> str:
-        return query
+    def correct(self, query: QueryView) -> str:
+        return query.textual_query
 
 class WhooshSpellCorrection(SpellCorrectionService):
     def correct(self, query: QueryView) -> str:
