@@ -46,11 +46,8 @@ class IRModel(ABC):
         return qparser.MultifieldParser([i.name.lower() for i in query.search_fields], self.index.schema)
     
     def search(self, query: QueryView) -> List[ResultView]:
-        corrected_query = self.spell_corrector.correct(query)
-        expanded_query = self.query_expander.expand(corrected_query)
-        
         parser = self.get_query_parser(query)
-        query = parser.parse(expanded_query)
+        query = parser.parse(query.textual_query)
         with self.index.searcher(weighting = self.weighting_model) as s:
             hits = [ResultView(**hit) for hit in s.search(query)]
 

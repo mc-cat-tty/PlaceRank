@@ -1,6 +1,5 @@
 from __future__ import annotations
 import functools
-from tkinter import font
 from tkinter.tix import MAIN
 from urwid import *
 from placerank.views import SearchFields, ResultView, QueryView, DocumentView
@@ -15,6 +14,7 @@ PALETTE = (
     ('frame', 'white', 'light gray'),
     ('btn', 'light magenta', 'light gray'),
     ('reversed', 'white', 'dark magenta', 'standout'),  # Improper use. Remove this record for real inverted color focused items
+    ('link', 'black, underline', 'light gray')
 )
 
 FIELDS = (f.name for f in SearchFields)
@@ -34,10 +34,11 @@ class BaseContainer(Overlay):
             **kwargs
         )
 
+
 class SearchBar(WidgetWrap):
     def __init__(self, **kwargs):
         self.checkboxes: List[CheckBox] = [CheckBox(f, True) for f in FIELDS]
-        
+
         self.search_text_label = Text('Textual search: ')
         self.search_text_field = Edit(wrap = 'clip')
         self.room_type_label = Text('Room type: ')
@@ -65,17 +66,56 @@ class SearchBar(WidgetWrap):
             ('pack', AttrMap(self.search_button, None, focus_map='reversed')),
         ))
 
+        self.dym_suggestion = Text(' ')
+
+        self.suggestion_line = Filler(
+            Columns((
+                ('pack', Text('Did you mean ')),
+                ('pack', AttrMap(self.dym_suggestion, 'link', 'reversed')),
+                ('pack', Text('?'))
+            )),
+            **kwargs
+        )
+        self.new_suggestion = Observer(self._update_suggestion, [Events.DID_YOU_MEAN.value, Events.EXPANDED_ALTERNATIVE.value])
+
         self.search_bar = Filler(
             ListBox((
                 self.search_text,
-                self.search_fields
+                self.search_fields,
+                Divider(),
+                Filler(self.suggestion_line)
             )),
-            height=4,
+            height=6,
             **kwargs
         )
-        
+
+
         WidgetWrap.__init__(self, self.search_bar)
-    
+
+    def _update_suggestion(self, e: Event, suggestion: str):
+        def active_mouse_event(size, event, button, col, row, focus):
+            if event != 'mouse release':
+                return super(type(self.dym_suggestion), self.dym_suggestion).mouse_event(size, event, button, col, row, focus)
+            self.search_text_field.set_edit_text(self.dym_suggestion.get_text()[0])
+            self._search_listener()
+        
+        def inactive_mouse_event(size, event, button, col, row, focus):
+            return super(type(self.dym_suggestion), self.dym_suggestion).mouse_event(size, event, button, col, row, focus)
+
+        if e == Events.DID_YOU_MEAN.value:
+            if suggestion:
+                self.dym_suggestion.set_text(suggestion)
+                self.dym_suggestion.mouse_event = active_mouse_event
+            else:
+                self.dym_suggestion.set_text(' ')
+                self.dym_suggestion.mouse_event = inactive_mouse_event
+
+
+            # Events.SEARCH_QUERY_UPDATE.value.notify(suggestion)
+
+        # elif e == Events.EXPANDED_ALTERNATIVE:
+        #     self.suggestion.set_text(f'An expanded alternative could be: {suggestion}?')
+
     def _get_checkboxes_state(self) -> SearchFields:
         return functools.reduce(
             lambda x, y: x | y,
@@ -113,7 +153,7 @@ class ResultCard(WidgetWrap):
             **kwargs
         )
         WidgetWrap.__init__(self, self.card)
-    
+
     def selectable(self):
         return True
 
@@ -141,11 +181,11 @@ class SearchArea(WidgetWrap):
         self.search_results_update = Observer(self._results_listener, [Events.SEARCH_RESULTS_UPDATE.value])
 
         WidgetWrap.__init__(self, self.search_area)
-    
+
     def keypress(self, size, key):
         if key != 'tab': return super().keypress(size, key)
         Events.MOVE_FOCUS_TO_CONTROLS.value.notify()
-    
+
     def _results_listener(self, event: Event, results: List[ResultView]) -> None:
         self.results.clear()
         self.results.append(Text(f'Showing top {len(results)} results'))
@@ -167,11 +207,11 @@ class Controls(WidgetWrap):
                 ('weight', 35, Divider()),
         ))
         WidgetWrap.__init__(self, Filler(self.controls, **kwargs))
-    
+
     def keypress(self, size, key):
         if key != 'tab': return super().keypress(size, key)
         Events.MOVE_FOCUS_TO_SEARCH.value.notify()
-    
+
     def btn_press(self, btn):
         if btn == self.advanced: return Events.ADVANCED_SCREEN.value.notify()
         if btn == self.help: return Events.HELP_SCREEN.value.notify()
@@ -184,7 +224,7 @@ class Window(WidgetWrap):
         # STATE
         self.help_txt = help_txt
         self.main_description_txt = (
-            '''Full-text search engine for AirBnB listings with support for sentiment analysis and word2vec.\n'''
+            '''Full-text search engine for AirBnB listings with support for sentiment tagging and contextual query expansion.\n'''
             '''Try it yourself with queries like: "Manhattan apartment with amazing skyline view", "Row house nearby Brooklyn Bridge", "Cheap room in dangerous block"'''
         )
         self.current_page: int | self.Page = MAIN
@@ -202,7 +242,7 @@ class Window(WidgetWrap):
             footer = self.controls
         )
         self.base_container = BaseContainer(self.inner_container)
-        
+
         # CALLBACKS
         self.inner_container_focus_change = Observer(
             lambda e: self.inner_container.set_focus('footer' if e == Events.MOVE_FOCUS_TO_CONTROLS.value else 'body'),
@@ -222,11 +262,11 @@ class Window(WidgetWrap):
             LineBox(Text(self.help_txt)),
             width = ('relative', 90), align = 'center'
         )
-        
+
         self.description.set_text('HELP PAGE')
         self.current_page = self.Page.HELP
         Events.MOVE_FOCUS_TO_SEARCH.value.unregister_observer(self.inner_container_focus_change)
-    
+
     def _open_advanced_page(self, event: Event):
         if self.current_page == self.Page.ADVANCED: return
 
@@ -237,7 +277,7 @@ class Window(WidgetWrap):
         self.description.set_text('ADVANCED PAGE')
         self.current_page = self.Page.ADVANCED
         Events.MOVE_FOCUS_TO_SEARCH.value.unregister_observer(self.inner_container_focus_change)
-    
+
     def _open_result(self, event: Event, doc: DocumentView):
         if self.current_page == doc['id']: return
 
@@ -251,11 +291,11 @@ class Window(WidgetWrap):
         self.inner_container.set_focus('footer')
         self.controls.controls.set_focus(5)
         Events.MOVE_FOCUS_TO_SEARCH.value.unregister_observer(self.inner_container_focus_change)
-    
+
     def _exit_callback(self, event: Event):
         if self.current_page == self.Page.MAIN:
             raise ExitMainLoop()
-        
+
         Events.MOVE_FOCUS_TO_SEARCH.value.register_observer(self.inner_container_focus_change)
         self.description.set_text(self.main_description_txt)
         self.content_area.original_widget = self.search_area

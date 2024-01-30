@@ -34,7 +34,12 @@ class Presenter:
     
     def search_query_update(self, event: Event, query: QueryView) -> None:
         results = self._model.search(query)
-        # Events.DID_YOU_MEAN.value.notify(q)
+        
+        if (cq := self._model.spell_corrector.correct(query)) != query.textual_query:
+            Events.DID_YOU_MEAN.value.notify(cq)
+        else:
+            Events.DID_YOU_MEAN.value.notify('')
+
         Events.SEARCH_RESULTS_UPDATE.value.notify(results)
 
     def open_result_request(self, event: Event, doc_id: int) -> None:
