@@ -54,10 +54,9 @@ class ReviewsIndex:
         if not reviews:
             return {}
         
-        reference_date = max([datetime.strptime(x, "%Y-%m-%d") for x in map(itemgetter(1), reviews)])
+        reference_date = max([x for x in map(itemgetter(1), reviews)])
 
         def decay(date):
-            date = self.__todate(date)
             return math.e ** (- lambda_mult * ((reference_date - date).days))
         
         sentiment_vector = defaultdict(int)

@@ -106,9 +106,9 @@ class ReviewsDict:
 
 def preprocess_comment(comment: str) -> str:
     """
-    Returns up to the first 512 characters of the comment.
+    Returns up to the first 500 characters of the comment.
     """
-    return comment[:512]
+    return comment[:500]
 
 
 def build_reviews_index(link: str = REVIEWS_LINK):
@@ -117,7 +117,7 @@ def build_reviews_index(link: str = REVIEWS_LINK):
     sent = GoEmotionsClassifier()
 
     with open("reviews", "r+") as storage, open("reviews.pickle", "bw") as fp:
-        download_dataset_source(storage, link)
+        #download_dataset_source(storage, link)
 
         print("Downloaded dataset")
 
@@ -141,7 +141,7 @@ def build_reviews_index(link: str = REVIEWS_LINK):
 
 if __name__ == "__main__":
     #populate_index(sys.argv[1])
-    build_reviews_index()
+    build_reviews_index("http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/reviews.csv.gz")
 
     #with open("reviews", "r") as fp:
     #    a = ReviewsDict(fp)
