@@ -1,3 +1,4 @@
+from sentimentModule.sentiment import GoEmotionsClassifier
 from placerank.views import InsideAirbnbSchema, DocumentView
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.index import create_in, Index
@@ -8,8 +9,19 @@ import os
 import sys
 import csv
 import gzip
+import sys
+from collections import defaultdict
+import pickle
+from operator import itemgetter
+from itertools import islice
+from datetime import datetime
 import pydash
 import argparse
+
+LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
+REVIEWS_LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/reviews.csv.gz"
+
+BATCH_SIZE = 10000
 
 # DEFAULT_URL = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
 # DEFAULT_DIR = "index/"
@@ -84,6 +96,82 @@ def populate_index(index_dir: str, local_file: str, remote_url: str = None, anal
             writer.add_document(**schema.get_document_logic_view(row))
 
     ix.close()
+
+
+class ReviewsDict:
+    """
+    Represent a Reviews file as a dictionary. Decodes CSV, preprocess text for BERT compatibility and
+    filter the latest 10 reviews for each listing.
+    """
+
+    LAST_REVIEWS = 10
+
+    def __init__(self, fp):
+        self.csvdictreader = csv.DictReader(fp)
+        self.__iterobj = None
+        self.__last_id = 0
+        self.__counter = 0
+
+    @staticmethod
+    def __todate(s: str):
+        return datetime.strptime(s, "%Y-%m-%d")
+    
+    def __filter_first(self, row):
+        if row.get("listing_id") != self.__last_id:
+            self.__last_id = row.get("listing_id")
+            self.__counter = 0
+
+        if self.__counter < self.LAST_REVIEWS:
+            self.__counter += 1
+            
+            return True
+
+        return False
+    
+    def __iter__(self):
+        if self.__iterobj:
+            return self.__iterobj
+        
+        converted_types = map(lambda x: x | {"listing_id": int(x["listing_id"]), "id": int(x["id"]), "date": ReviewsDict.__todate(x["date"])}, self.csvdictreader)
+        sortedreviews = sorted(converted_types, key=lambda x: (x.get("listing_id"), x.get("date") ), reverse=True)
+        self.__iterobj = filter(self.__filter_first, sortedreviews)
+
+        return self.__iterobj
+
+
+def preprocess_comment(comment: str) -> str:
+    """
+    Returns up to the first 500 characters of the comment.
+    """
+    return comment[:500]
+
+
+def build_reviews_index(link: str = REVIEWS_LINK):
+    reviews_index = defaultdict(list)
+
+    sent = GoEmotionsClassifier()
+
+    with open("reviews", "r+") as storage, open("reviews.pickle", "bw") as fp:
+        #download_dataset_source(storage, link)
+
+        print("Downloaded dataset")
+
+        dset = ReviewsDict(storage)
+
+        while True:
+            nextbatch = [r for r in islice(dset, BATCH_SIZE)]
+            
+            if not nextbatch:
+                break
+
+            comments = map(preprocess_comment, map(itemgetter("comments"), nextbatch))
+            sentiments = sent.classify_texts(list(comments))
+
+            for row, sentiment in zip(nextbatch, sentiments):
+                print(row.get("id"))
+                reviews_index[int(row["listing_id"])].append((int(row["id"]), row["date"], sentiment))
+
+        pickle.dump(reviews_index, fp)
 
 
 def load_page(local_dataset: str, id: str) -> DocumentView:
