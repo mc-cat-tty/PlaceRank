@@ -79,7 +79,8 @@ class SearchBar(WidgetWrap):
     def _get_checkboxes_state(self) -> SearchFields:
         return functools.reduce(
             lambda x, y: x | y,
-            (SearchFields[c.label] for c in self.checkboxes if c.state)
+            (SearchFields[c.label] for c in self.checkboxes if c.state),
+            SearchFields(0)
         )
 
     def _search_listener(self) -> None:
