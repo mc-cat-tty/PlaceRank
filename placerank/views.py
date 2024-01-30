@@ -3,6 +3,11 @@ from typing import Dict, NamedTuple
 from placerank.preprocessing import get_default_analyzer
 from whoosh.fields import FieldType, Schema, ID, TEXT, KEYWORD
 from enum import Flag, auto, verify, NAMED_FLAGS
+from datetime import datetime
+from operator import itemgetter
+from collections import defaultdict
+import math
+import pickle
 
 class InsideAirbnbSchema(Schema):
     """
@@ -73,3 +78,63 @@ class ResultView(NamedTuple):
     id: str
     name: str
     room_type: str
+
+
+class ReviewsIndex:
+
+    def __init__(self, path = "reviews.pickle"):
+        with open("reviews.pickle", "rb") as fp:
+            self.index = pickle.load(fp)
+
+    def __todate(self, s: str):
+        return datetime.strptime(s, "%Y-%m-%d")
+
+    def get_sentiment_for(self, key, lambda_mult = 1):
+        """
+        Return the sentiment by exponential decay mean.
+        """
+
+        reviews = self.index.get(key)
+        
+        if not reviews:
+            return {}
+        
+        reference_date = max([x for x in map(itemgetter(1), reviews)])
+
+        def decay(date):
+            return math.e ** (- lambda_mult * ((reference_date - date).days))
+        
+        sentiment_vector = defaultdict(int)
+
+        for rid, date, sentiments in reviews:
+            for sentiment in sentiments:
+                sentiment_vector[sentiment.get("label")] += sentiment.get("score") * decay(date)
+
+        return sentiment_vector
+
+    def get_mean_sentiment_for(self, key, lambda_mult = 1):
+        """
+        Return the sentiment by simple averaging.
+        """
+
+        reviews = self.index.get(key)
+        
+        if not reviews:
+            return {}
+        
+        reference_date = max([datetime.strptime(x, "%Y-%m-%d") for x in map(itemgetter(1), reviews)])
+
+        def decay(date):
+            date = self.__todate(date)
+            return math.e ** (- lambda_mult * ((reference_date - date).days))
+        
+        sentiment_vector = defaultdict(int)
+
+        for rid, date, sentiments in reviews:
+            for sentiment in sentiments:
+                sentiment_vector[sentiment.get("label")] += sentiment.get("score")
+
+            for k, v in sentiment_vector.items():
+                sentiment_vector[k] = v / len(sentiments)
+
+        return sentiment_vector
