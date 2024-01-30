@@ -13,7 +13,8 @@ class GoEmotionsClassifier:
             tokenizer=self.tokenizer,
             task="text-classification",
             top_k=2,
-            function_to_apply='sigmoid'
+            function_to_apply='sigmoid',
+            device="mps"
         )
 
 
