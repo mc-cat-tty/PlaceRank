@@ -151,8 +151,8 @@ def build_reviews_index(link: str = REVIEWS_LINK):
 
     sent = GoEmotionsClassifier()
 
-    with open("reviews", "r+") as storage, open("reviews.pickle", "bw") as fp:
-        #download_dataset_source(storage, link)
+    with io.StringIO() as storage, open("reviews.pickle", "bw") as fp:
+        get_dataset("datasets/reviews.csv", link, storage)
 
         print("Downloaded dataset")
 
