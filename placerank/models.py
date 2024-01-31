@@ -4,6 +4,7 @@ Cooked models ready to ship
 
 from whoosh.scoring import WeightingModel, BM25F
 from whoosh.index import Index, open_dir
+from whoosh.query import *
 from typing import Type, Tuple, List
 
 from placerank.views import ResultView, QueryView, ReviewsIndex, SearchFields
@@ -31,6 +32,10 @@ class SentimentAwareIRModel(IRModel):
         sent_ranked_docs = self.sentiment_ranker.rank(docs, sentiment)[:limit]
 
         return (sent_ranked_docs, dlen)
+
+class UnionIRModel(IRModel):
+    def get_query_parser(self, query: QueryView):
+        return Or([Term(f.name.lower(), ) for f in query.search_fields for w in query.textual_query.split()])
 
 def main():
     idx = open_dir(INDEX_DIR)
