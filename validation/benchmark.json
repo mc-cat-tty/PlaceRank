@@ -1,0 +1,81 @@
+[
+    {
+        "uin": "Find me a room in someone's home near the Harvard University",
+        "text": "private room near harvard",
+        "room_type": "Private room",
+        "sentiments": [],
+        "relevant": [38360503,863179731043996638,38492542,8200278,863789008478115840,863857193342827363,956502103640995095,41273964,1021054928767481892,38823935,38960329,1021054928767481892,1024631607696785445,1021024681841646418,1021088928078185998,683527896872706362,1021131856491372052,682754796766681556,682742536989144884,1021121664023217954,1021083486109008221,38822539,41288141,33692520,37460222,7080737,13600523]
+    },
+    {
+        "uin": "I need an accomodation for my staying in Cambridge to help a parent in a local hospital",
+        "text": "home by the hospital",
+        "room_type": "Entire home/apt",
+        "sentiments": [],
+        "relevant": [918749466220965200,5666988,53574737,7729257,7881324,7883909,633276447851296684,752145851463773023,988456532079671597,15930566,18151308,889777551432433232,15523233,22842459,7872594,15023471]
+    },
+    {
+        "uin": "A spacious house for a group of guys on holiday",
+        "text": "house for group",
+        "room_type": "Entire home/apt",
+        "sentiments": [],
+        "relevant": [8758789, 949475573742371181, 6662157, 21012161, 1984737]
+    },
+    {
+        "uin": "I need a stay for me and my dog, I don't care about the cost",
+        "text": "dog-friendly",
+        "room_type": "",
+        "sentiments": [],
+        "relevant": [730342004988112602, 728859657019705842, 699096142291925099, 3506058, 3510127, 8308744, 33789540, 816862960601482709, 898743835070344633, 49026967, 49574487]
+    },
+    {
+        "uin": "I'm looking for a cozy stay for my vacation in Cambridge. I'm planning to have some relaxing time.",
+        "text": "cozy vacation stay",
+        "room_type": "",
+        "sentiments": ["admiration", "caring", "excitement", "gratitude", "approval"],
+        "relevant": [10355885, 6847242, 19942644, 762249424741408581, 46816839, 51708387, 1711476, 20572514, 45085165, 752145851463773023, 742574, 50783647, 12489082, 908741391390285905, 775259755847058465, 948903494770668957, 994346837966557081, 683482042351608986, 3678159, 53574737, 918749466220965200, 39896724, 6363476, 30428472]
+    },
+    {
+        "uin": "I need a place with a panoramic view over the city skyline for a photo shoot.",
+        "text": "panoramic view over the skyline",
+        "room_type": "",
+        "sentiments": [],
+        "relevant": [604949196079011955,52853281,562904650702512130,777425697740544030,949112021656232597,719840927147099149,52405923,46660463,898743835070344633,9975650,554149446811922669,583156733454046495,46822729,46602047,46601955,46602118]
+    },
+    {
+        "uin": "I'm on a budget. I need a cheap shared room. I don't mind if the block is sketchy.",
+        "text": "cheap shared room",
+        "room_type": "Shared room",
+        "sentiments": ["fear", "disgust", "anger", "annoyance", "disappointment", "disapproval"],
+        "relevant": [983506848306117725, 1022406782967361200, 52389721, 1022406782967361200]
+    },
+    {
+        "uin": "I'm looking for an apartment located in the east-Cambridge neighborhood, I can't wait to find an ideal location for my needs.",
+        "text": "east-cambridge neighborhood",
+        "room_type": "Entire home/apt",
+        "sentiments": ["excitement", "approval"],
+        "relevant": [50724014, 50724014, 1011434132378868116, 53981182, 15645066, 53981182, 38915459, 912260040502294810, 776129938479764291, 665964236829666436, 36795444, 3334098, 1022508266913236056, 14759578]
+    },
+    {
+        "uin": "Private, quiet and clean studio or small apartment in ideal location",
+        "text": "apartment or studio in mid-Cambridge",
+        "room_type": "Entire home/apt",
+        "sentiments": ["admiration", "approval", "neutral"],
+        "relevant": [17285749, 9975650, 2320273, 23202737, 20671080, 20153407, 12231967, 6261046, 1018705929755251305]
+    },
+    {
+        "uin": "I need a peaceful, private-room with private en suite ideally near the river.",
+        "text": "private room by the river",
+        "room_type": "Private room",
+        "sentiments": ["desire", "approval", "admiration", "neutral"],
+        "relevant": [976136745119302638, 939809139013928959, 939813177582086173, 984463752807910025, 939851762747637087, 939846250795981586, 15523233, 961661553888993640]
+    },
+    {
+        "uin": "I'm in a hurry to find a dorm room for a student near MIT",
+        "text": "room for students near MIT",
+        "room_type": "Private room",
+        "sentiments": ["annoyance", "neutral", "disapproval", "desire", "optimism"],
+        "relevant": [50171781, 50175808, 14212774, 14754163, 841777768042968655, 982717638805134477, 13203203, 15235520, 27498, 19581, 999462855395310148, 1893287, 28989060, 24888817, 1022340886777775581]
+    }
+
+
+]

@@ -9,6 +9,7 @@ from nltk.corpus import wordnet
 from whoosh.analysis import *
 from typing import Generator
 from operator import attrgetter
+import re
 
 
 class LemmaFilter(Filter):
@@ -51,9 +52,16 @@ class LemmaFilter(Filter):
                 yield token
 
 
-ANALYZER_NAIVE = RegexTokenizer() | LowercaseFilter() | StopFilter()
-ANALYZER_STEMMER = RegexTokenizer() | LowercaseFilter() | StopFilter() | StemFilter()
-ANALYZER_LEMMATIZER = RegexTokenizer() | LowercaseFilter() | LemmaFilter() | StopFilter()
+class RemoveBreakFilter(Filter):
+    def __call__(self, tokens):
+        for t in tokens:
+            if not re.match("br", t.text):            
+                yield t
+
+
+ANALYZER_NAIVE = RegexTokenizer() | RemoveBreakFilter() | LowercaseFilter() | StopFilter()
+ANALYZER_STEMMER = RegexTokenizer() | RemoveBreakFilter() | LowercaseFilter() | StopFilter() | StemFilter()
+ANALYZER_LEMMATIZER = RegexTokenizer() | RemoveBreakFilter() | LowercaseFilter() | LemmaFilter() | StopFilter()
 
 
 def get_default_analyzer() -> Analyzer:

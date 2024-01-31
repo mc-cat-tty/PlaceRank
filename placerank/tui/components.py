@@ -296,10 +296,10 @@ class Window(WidgetWrap):
         Events.MOVE_FOCUS_TO_SEARCH.value.unregister_observer(self.inner_container_focus_change)
 
     def _open_result(self, event: Event, doc: DocumentView, reviews: List[ReviewView]):
-        if self.current_page == doc['id']: return
+        if self.current_page == doc.id: return
 
         result_body = Pile(
-            (Text([('title', f'{key.upper()}: '), val]) for key, val in doc.items())
+            (Text([('title', f'{key.upper()}: '), val]) for key, val in zip(doc._fields, doc))
         )
 
 

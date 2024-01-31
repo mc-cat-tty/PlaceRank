@@ -47,7 +47,7 @@ def vector_boolean_search(ix, query: str) -> set[int]:
 
     with ix.searcher(weighting=FunctionWeighting(__binary_scoring)) as searcher:
         res = searcher.search(q)
-        return res.docs()
+        return [int(r.get("id")) for r in res]
 
 
 def vector_tfidf_search(ix, query: str) -> set[int]:
@@ -60,7 +60,7 @@ def vector_tfidf_search(ix, query: str) -> set[int]:
 
     with ix.searcher(weighting=TF_IDF) as searcher:
         res = searcher.search(q)
-        return res.docs()
+        return [int(r.get("id")) for r in res]
     
 
 def vector_bm25_search(ix, query: str) -> set[int]:
@@ -73,7 +73,18 @@ def vector_bm25_search(ix, query: str) -> set[int]:
 
     with ix.searcher(weighting=BM25F) as searcher:
         res = searcher.search(q)
-        return res.docs()
+        return [int(r.get("id")) for r in res]
+
+
+def index_search(ix, query: str, strategy = None) -> list[int]:
+    """
+    Performs index search for a given query and returns an ordered list of document IDs.
+    With no strategy, this performs a default TF-IDF scoring on retrieval.
+
+    TODO: move to a ranked list of results, opposed to a set.
+    """
+
+    return vector_tfidf_search(ix, query)
 
 
 def main():

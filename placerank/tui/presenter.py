@@ -11,8 +11,9 @@ model being injected as a dependency in it.
 from __future__ import annotations
 from placerank.ir_model import IRModel
 from placerank.tui.events import Event, Events, Observer
-from placerank.views import QueryView, ResultView, ReviewView
+from placerank.views import QueryView, ResultView, ReviewView, DocumentView
 from placerank.dataset import load_page
+import re
 
 from whoosh.index import Index
 from whoosh import qparser
@@ -29,6 +30,7 @@ class Presenter:
     def __init__(self, model: IRModel, local_dataset: str):
         self._model = model
         self._local_dataset = local_dataset
+        self._line_break_regex = re.compile(r'\s*<\s*br\s*/?>\s*')
         self.search_observser = Observer(self.search_query_update, [Events.SEARCH_QUERY_UPDATE.value])
         self.open_result_request_observer = Observer(self.open_result_request, [Events.OPEN_RESULT_REQUEST.value])
         self.autoexpansion_observer = Observer(self.autoexpansion_change, [Events.AUTOEXPANSION_STATE_CHANGE.value])
@@ -49,8 +51,12 @@ class Presenter:
         Events.SEARCH_RESULTS_UPDATE.value.notify(results)
 
     def open_result_request(self, event: Event, doc_id: int) -> None:
+        page = load_page(self._local_dataset, doc_id)
+
+        cleaned_page = DocumentView(*(self._line_break_regex.sub('\n', field) if type(field) is str else field for field in page))
+
         Events.OPEN_RESULT.value.notify(
-            load_page(self._local_dataset, doc_id),
+            cleaned_page,
             [ReviewView(comments = 'comment', reviewer_name='pino'), ReviewView(comments = 'nice', reviewer_name = 'marco')]
         )
 
