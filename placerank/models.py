@@ -86,7 +86,7 @@ class RetrievalModelDumb(RetrievalModel):
         parser = QueryParser("neighborhood_overview", self._index.schema)
         query = parser.parse(query.textual_query)
         with self._index.searcher() as s:
-            return [ResultView(**hit) for hit in s.search(query)]
+            return [ResultView(**dict(hit) | {"score": hit.score}) for hit in s.search(query)]
         
 class SentimentRanker:
     def __init__(self):
