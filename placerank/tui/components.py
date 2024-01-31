@@ -67,6 +67,7 @@ class SearchBar(WidgetWrap):
 
         self.dym_suggestion = Text(' ')
         self.expanded_suggestion = Text(' ')
+        self.autoexpansion = CheckBox('', False)
 
         self.correction_line = Columns((
             ('pack', Text('Did you mean ')),
@@ -77,7 +78,12 @@ class SearchBar(WidgetWrap):
         self.expansion_line =  Columns((
             ('pack', Text('Try "')),
             ('pack', self.expanded_suggestion),
-            ('pack', Text('" to increase recall. Enable autoexpansion? '))
+            ('pack', Text('" to increase recall'))
+        ))
+
+        self.enable_expansion = Columns((
+            ('pack', Text('This is just a propostal. Enable autoexpansion? ')),
+            (('pack', self.autoexpansion))
         ))
 
         self.new_suggestion = Observer(self._update_suggestion, [Events.DID_YOU_MEAN.value, Events.EXPANDED_ALTERNATIVE.value])
@@ -89,9 +95,10 @@ class SearchBar(WidgetWrap):
                 self.search_fields,
                 Divider(),
                 Filler(self.correction_line),
-                Filler(self.expansion_line)
+                Filler(self.expansion_line),
+                Filler(self.enable_expansion)
             )),
-            height=8,
+            height=9,
             **kwargs
         )
 
