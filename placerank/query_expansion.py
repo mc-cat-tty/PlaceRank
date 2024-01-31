@@ -21,6 +21,9 @@ class QueryExpansionService(ABC):
 
     @abstractmethod
     def expand(self, query: str, max_results: int = 2, confidence_threshold: float = 0.9, **kwargs) -> str:
+        """
+        Return a string compatible with Whoosh's OperatorsPlugin
+        """
         ...
 
 
@@ -67,7 +70,7 @@ class ThesaurusQueryExpansion(QueryExpansionService):
     def expand(self, query: str, max_results: int = 2, confidence_threshold: float = 0.9) -> str:
         tokens = self._tokenize(query)
         query_embedding = self._get_embedding(query)
-        expanded_query = ""
+        expanded_query = []
        
         for idx, token in enumerate(tokens):
             query_fmt = self._formattable_token(tokens, idx) 
@@ -100,10 +103,23 @@ class ThesaurusQueryExpansion(QueryExpansionService):
                     .value()
             )
 
-            # print(token, expansions)
-            expanded_query += " " + ' '.join(expansions + [token])
+            # expanded_query += " " + ' '.join(expansions + [token])
+            expanded_query.append(expansions +  [token])
 
-        return expanded_query.strip()
+        expanded_query = (
+            pydash.chain(expanded_query)
+                .map(
+                    lambda sublist:
+                        pydash.chain(sublist)
+                            .intersperse('OR')
+                            .value()
+                )
+                .map(lambda s: ['('] + s + [')'])
+                .intercalate('AND')
+                .value()
+        )
+        expanded_query = ' '.join(expanded_query)
+        return expanded_query
 
 class LLMQueryExpansion(QueryExpansionService):
     """
@@ -153,7 +169,7 @@ class LLMQueryExpansion(QueryExpansionService):
     def expand(self, query: str, max_results: int = 2, confidence_threshold: float = 0.9, overprediction: int = 5) -> str:
         tokens = self._tokenize(query)
         query_embedding = self._get_embedding(query)
-        expanded_query = ""
+        expanded_query = []
        
         for idx, token in enumerate(tokens):
             candidates = self.unmasker(self._mask_token(['[CLS] '] + tokens + [' [SEP]'], idx+1), top_k = max_results*overprediction)
@@ -177,10 +193,23 @@ class LLMQueryExpansion(QueryExpansionService):
                     .value()
             )
             
-            expanded_query += " " + ' '.join(set(expansions + [token]))
-
-        return expanded_query.strip()
-
+            # expanded_query += " " + ' '.join(set(expansions + [token]))
+            expanded_query.append(expansions +  [token])
+        
+        expanded_query = (
+            pydash.chain(expanded_query)
+                .map(
+                    lambda sublist:
+                        pydash.chain(sublist)
+                            .intersperse('OR')
+                            .value()
+                )
+                .map(lambda s: ['('] + s + [')'])
+                .intercalate('AND')
+                .value()
+        )
+        expanded_query = ' '.join(expanded_query)
+        return expanded_query
 
 def main():
     qe_wn = ThesaurusQueryExpansion('hf_cache')

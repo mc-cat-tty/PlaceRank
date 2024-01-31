@@ -21,6 +21,7 @@ This module contains the definition of a `IRModel`, aka a search engine stack:
 from __future__ import annotations
 from abc import ABC, abstractmethod
 import math
+import pydash
 from enum import auto
 from operator import itemgetter
 from whoosh.scoring import WeightingModel
@@ -57,6 +58,7 @@ class IRModel(ABC):
         expanded_query = self.query_expander.expand(query.textual_query)
 
         parser = qparser.QueryParser('room_type', self.index.schema)
+        parser.add_plugin(qparser.OperatorsPlugin())
         room_type = parser.parse(query.room_type) if query.room_type else None
 
         parser = self.get_query_parser(query)

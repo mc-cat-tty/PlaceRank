@@ -7,9 +7,9 @@ from whoosh.index import Index, open_dir
 from typing import Type, Tuple, List
 
 from placerank.views import ResultView, QueryView, ReviewsIndex, SearchFields
-from placerank.ir_model import IRModel, NoSpellCorrection, SentimentRanker, SpellCorrectionService
-from placerank.query_expansion import NoQueryExpansion, QueryExpansionService
-from placerank.config import INDEX_DIR, REVIEWS_INDEX
+from placerank.ir_model import IRModel, NoSpellCorrection, SentimentRanker, SpellCorrectionService, WhooshSpellCorrection
+from placerank.query_expansion import NoQueryExpansion, QueryExpansionService, ThesaurusQueryExpansion
+from placerank.config import HF_CACHE, INDEX_DIR, REVIEWS_INDEX
 
 class SentimentAwareIRModel(IRModel):
     def __init__(
@@ -37,12 +37,22 @@ def main():
     sentiment_model = SentimentAwareIRModel(NoSpellCorrection, NoQueryExpansion(), idx, SentimentRanker(REVIEWS_INDEX))
     sentiment_res = sentiment_model.search(
         QueryView(
-            textual_query = u'apartment in manhattan',
+            textual_query = u'apartment in manhattan',  # Stopwords like 'in' are removed
             sentiment_tags = 'joy',
             search_fields = SearchFields.DESCRIPTION | SearchFields.NEIGHBORHOOD_OVERVIEW | SearchFields.NAME
         )
     )[1]
-    print(f"{sentiment_res=}")
+
+    qe_model = IRModel(NoSpellCorrection, ThesaurusQueryExpansion(HF_CACHE), idx)
+    qe_model.set_autoexpansion(True)
+    qe_res = qe_model.search(
+        QueryView(
+            textual_query = u'apartment in manhattan',
+            search_fields = SearchFields.DESCRIPTION | SearchFields.NEIGHBORHOOD_OVERVIEW | SearchFields.NAME
+        ),
+    )[1]
+
+    print(f"{sentiment_res=} {qe_res=}")
 
 if __name__ == "__main__":
     main()
