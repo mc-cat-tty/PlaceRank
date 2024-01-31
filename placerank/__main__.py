@@ -3,7 +3,7 @@ from placerank.tui.events import *
 from placerank.tui.presenter import *
 from placerank.query_expansion import *
 from placerank.ir_model import *
-from placerank.config import HELP_FILENAME, DATASET_CACHE_FILE
+from placerank.config import HELP_FILENAME, DATASET_CACHE_FILE, HF_CACHE
 from whoosh.index import open_dir
 from urwid import MainLoop, ExitMainLoop
 import signal
@@ -19,7 +19,7 @@ def main() -> None:
         window = Window(readme.read())
     
     idx = open_dir("index")
-    model = IRModel(WhooshSpellCorrection, NoQueryExpansion(), idx, )
+    model = IRModel(WhooshSpellCorrection, ThesaurusQueryExpansion(HF_CACHE), idx, )
     presenter = Presenter(model, DATASET_CACHE_FILE)
     loop = MainLoop(window, palette=PALETTE)
     loop.run()

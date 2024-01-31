@@ -66,7 +66,7 @@ class SearchBar(WidgetWrap):
         ))
 
         self.dym_suggestion = Text(' ')
-        self.expanded_suggestion = Text('expanded query')
+        self.expanded_suggestion = Text(' ')
 
         self.correction_line = Columns((
             ('pack', Text('Did you mean ')),
@@ -99,16 +99,16 @@ class SearchBar(WidgetWrap):
         WidgetWrap.__init__(self, self.search_bar)
 
     def _update_suggestion(self, e: Event, suggestion: str):
-        def active_mouse_event(size, event, button, col, row, focus):
-            if event != 'mouse release':
-                return super(type(self.dym_suggestion), self.dym_suggestion).mouse_event(size, event, button, col, row, focus)
-            self.search_text_field.set_edit_text(self.dym_suggestion.get_text()[0])
-            self._search_listener()
-        
-        def inactive_mouse_event(size, event, button, col, row, focus):
-            return super(type(self.dym_suggestion), self.dym_suggestion).mouse_event(size, event, button, col, row, focus)
-
         if e == Events.DID_YOU_MEAN.value:
+            def active_mouse_event(size, event, button, col, row, focus):
+                if event != 'mouse release':
+                    return super(type(self.dym_suggestion), self.dym_suggestion).mouse_event(size, event, button, col, row, focus)
+                self.search_text_field.set_edit_text(self.dym_suggestion.get_text()[0])
+                self._search_listener()
+            
+            def inactive_mouse_event(size, event, button, col, row, focus):
+                return super(type(self.dym_suggestion), self.dym_suggestion).mouse_event(size, event, button, col, row, focus)
+            
             if suggestion:
                 self.dym_suggestion.set_text(suggestion)
                 self.dym_suggestion.mouse_event = active_mouse_event
@@ -116,11 +116,8 @@ class SearchBar(WidgetWrap):
                 self.dym_suggestion.set_text(' ')
                 self.dym_suggestion.mouse_event = inactive_mouse_event
 
-
-            # Events.SEARCH_QUERY_UPDATE.value.notify(suggestion)
-
-        # elif e == Events.EXPANDED_ALTERNATIVE:
-        #     self.suggestion.set_text(f'An expanded alternative could be: {suggestion}?')
+        elif e == Events.EXPANDED_ALTERNATIVE.value:
+            self.expanded_suggestion.set_text(suggestion)
 
     def _get_checkboxes_state(self) -> SearchFields:
         return functools.reduce(

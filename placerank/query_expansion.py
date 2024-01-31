@@ -20,7 +20,7 @@ class QueryExpansionService(ABC):
     """
 
     @abstractmethod
-    def expand(query: str) -> str:
+    def expand(self, query: str, max_results: int = 2, confidence_threshold: float = 0.9, **kwargs) -> str:
         ...
 
 
@@ -28,7 +28,7 @@ class NoQueryExpansion(QueryExpansionService):
     """
     A mock object that does nothing on the query
     """
-    def expand(self, query: str) -> str:
+    def expand(self, query: str, **kwargs) -> str:
         return query
 
 
