@@ -2,7 +2,9 @@
 Module to test performance of an index against predefined queries.
 """
 
-from placerank.search import index_search
+from placerank.ir_model import *
+from placerank.models import *
+from placerank.config import *
 from whoosh.index import open_dir
 import json
 from operator import itemgetter
@@ -63,7 +65,7 @@ class Benchmark:
             self.__dset = BenchmarkDataset(fp)
 
 
-    def test_against(self, ix):
+    def test_against(self, ir_model):
         """
         Tests the benchmark against a given index.
         This is the first call needed to compute different measures.
@@ -71,7 +73,13 @@ class Benchmark:
         
         # Produce a list of (query, retrieve_results)
         self.__results = [
-            (q, index_search(ix, q.text)) for q in self.__dset.queries
+            (q, ir_model.search(
+                QueryView(
+                    textual_query=q.text,
+                    sentiment_tags=" ".join(q.sentiments),
+                    search_fields=SearchFields.DESCRIPTION | SearchFields.NEIGHBORHOOD_OVERVIEW | SearchFields.NAME
+                )
+            )[0]) for q in self.__dset.queries
         ]
 
         self.results = self.__results
@@ -185,18 +193,20 @@ def main():
     """
 
     bench = Benchmark()
-    ix = open_dir("index/benchmark")
 
-    bench.test_against(ix)
+    idx = open_dir(INDEX_DIR)
+    sentiment_model = SentimentAwareIRModel(NoSpellCorrection, NoQueryExpansion(), idx, SentimentRanker(REVIEWS_INDEX))
+    
+    bench.test_against(sentiment_model)
     
     for (query, results), (_q, precision), (__q, recall) in zip(bench.results, bench.precision(), bench.recall()):
         print(f"{query.text} {results} p:{precision} r:{recall}")
 
-    print(bench.precision_at_r())
-    print(bench.precision_at_recall_levels())
+    #print(bench.precision_at_r())
+    #print(bench.precision_at_recall_levels())
     #print(bench.average_precision())
-    print(bench.f1())
-    print(bench.e())
+    #print(bench.f1())
+    #print(bench.e())
 
 if __name__ == "__main__":
     main()
