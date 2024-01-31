@@ -1,5 +1,6 @@
 DATASET_URL = 'http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz'
 REVIEWS_URL = 'http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/reviews.csv.gz'
+BATCH_SIZE = 10000
 INDEX_DIR = 'index/'
 REVIEWS_INDEX = "reviews.pickle"
 REVIEWS_DB = "reviewsdb.pickle"

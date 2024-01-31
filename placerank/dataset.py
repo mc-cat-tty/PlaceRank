@@ -18,15 +18,7 @@ from itertools import islice
 from datetime import datetime
 import pydash
 import argparse
-
-LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
-REVIEWS_LINK = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/reviews.csv.gz"
-
-BATCH_SIZE = 10000
-
-# DEFAULT_URL = "http://data.insideairbnb.com/united-states/ny/new-york-city/2024-01-05/data/listings.csv.gz"
-# DEFAULT_DIR = "index/"
-# DEFAULT_LOCAL_FILE = "datasets/listings.csv"
+from config import *
 
 def download_dataset(url: str, storage: io.StringIO) -> io.StringIO:
     """
@@ -147,7 +139,7 @@ def preprocess_comment(comment: str) -> str:
     return comment[:500]
 
 
-def build_reviews_index(link: str = REVIEWS_LINK):
+def build_reviews_index(link: str = REVIEWS_URL):
     reviews_index = defaultdict(list)
 
     sent = GoEmotionsClassifier()
