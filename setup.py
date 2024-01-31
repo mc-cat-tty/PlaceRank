@@ -15,7 +15,7 @@ def main():
     dataset.build_reviews_index(REVIEWS_URL)
 
     # Populate an in-memory database of reviews using REVIEWS_DATASET_CACHE_FILE, stored in REVIEWS_DB
-    dataset.ReviewsDatabase(REVIEWS_DATASET_CACHE_FILE)
+    dataset.ReviewsDatabase(REVIEWS_CACHE_FILE)
     
     query_expansion.setup([HF_MODEL_MASKING, HF_MODEL_ENCODING], HF_CACHE)
 

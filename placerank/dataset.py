@@ -1,5 +1,5 @@
 from placerank.sentiment import GoEmotionsClassifier
-from placerank.views import InsideAirbnbSchema, DocumentView
+from placerank.views import InsideAirbnbSchema, DocumentView, ReviewView
 import placerank.config as config
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.index import create_in, Index
