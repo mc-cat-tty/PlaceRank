@@ -182,7 +182,7 @@ class SearchArea(WidgetWrap):
     def __init__(self, **kwargs):
         self.search_bar = SearchBar()
         self.results = SimpleFocusListWalker([])
-        self.result_area = ListBox(self.results)
+        self.result_area = LineBox(ListBox(self.results), 'Results')
         self.search_area = Pile(
             (('pack', self.search_bar), self.result_area),
             focus_item = self.search_bar,
@@ -198,9 +198,10 @@ class SearchArea(WidgetWrap):
         Events.MOVE_FOCUS_TO_CONTROLS.value.notify()
 
     def _results_listener(self, event: Event, results: List[ResultView]) -> None:
+        self.result_area.set_title(f'Showing top {len(results)} results')
         self.results.clear()
-        self.results.append(Text(f'Showing top {len(results)} results'))
         self.results.extend(SimpleFocusListWalker(map(ResultCard, results)))
+        self.results.set_focus(0)
 
 class Controls(WidgetWrap):
     def __init__(self, **kwargs):
