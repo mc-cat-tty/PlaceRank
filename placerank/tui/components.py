@@ -66,25 +66,32 @@ class SearchBar(WidgetWrap):
         ))
 
         self.dym_suggestion = Text(' ')
+        self.expanded_suggestion = Text('expanded query')
 
-        self.suggestion_line = Filler(
-            Columns((
-                ('pack', Text('Did you mean ')),
-                ('pack', AttrMap(self.dym_suggestion, 'link', 'reversed')),
-                ('pack', Text('?'))
-            )),
-            **kwargs
-        )
+        self.correction_line = Columns((
+            ('pack', Text('Did you mean ')),
+            ('pack', AttrMap(self.dym_suggestion, 'link', 'reversed')),
+            ('pack', Text('?'))
+        ))
+
+        self.expansion_line =  Columns((
+            ('pack', Text('Try "')),
+            ('pack', self.expanded_suggestion),
+            ('pack', Text('" to increase recall. Enable autoexpansion? '))
+        ))
+
         self.new_suggestion = Observer(self._update_suggestion, [Events.DID_YOU_MEAN.value, Events.EXPANDED_ALTERNATIVE.value])
 
         self.search_bar = Filler(
             ListBox((
                 self.search_text,
+                Divider(),
                 self.search_fields,
                 Divider(),
-                Filler(self.suggestion_line)
+                Filler(self.correction_line),
+                Filler(self.expansion_line)
             )),
-            height=6,
+            height=8,
             **kwargs
         )
 
@@ -141,7 +148,7 @@ class ResultCard(WidgetWrap):
         self.result = result
         self.card = Filler(
             AttrMap(
-                Columns((
+                cols := Columns((
                     (30, Text(str(result.id))),
                     Text(str(result.name)),
                     Text(str(result.room_type)),
@@ -151,13 +158,14 @@ class ResultCard(WidgetWrap):
             ),
             **kwargs
         )
+        self.cols = cols
         WidgetWrap.__init__(self, self.card)
 
     def selectable(self):
         return True
 
     def mouse_event(self, size, event, button, col, row, focus):
-        if event != 'mouse release': return super().mouse_event(size, event, button, col, row, focus)
+        if event != 'mouse press': return super().mouse_event(size, event, button, col, row, focus)
         Events.OPEN_RESULT_REQUEST.value.notify(self.result.id)
 
     def keypress(self, size, key):
@@ -288,6 +296,7 @@ class Window(WidgetWrap):
         )
         self.current_page = 1
         self.inner_container.set_focus('footer')
+        self.controls.controls.set_focus(3)
         Events.MOVE_FOCUS_TO_SEARCH.value.unregister_observer(self.inner_container_focus_change)
 
     def _exit_callback(self, event: Event):
