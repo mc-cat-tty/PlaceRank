@@ -42,15 +42,19 @@ class IRModel(ABC):
         self.query_expander = query_expander
         self.index = index
         self.weighting_model = weighting_model
+        self._autoexpansion = False
 
     def get_query_parser(self, query: QueryView) -> qparser.QueryParser:
         return qparser.MultifieldParser([i.name.lower() for i in query.search_fields], self.index.schema)
     
-    def search(self, query: QueryView, autoexpansion: bool = False) -> List[ResultView]:
+    def set_autoexpansion(self, autoexpansion: bool):
+        self._autoexpansion = autoexpansion
+
+    def search(self, query: QueryView) -> List[ResultView]:
         expanded_query = self.query_expander.expand(query.textual_query)
 
         parser = self.get_query_parser(query)
-        query = parser.parse(query.textual_query if autoexpansion else query.textual_query)
+        query = parser.parse(expanded_query if self._autoexpansion else query.textual_query)
         with self.index.searcher(weighting = self.weighting_model) as s:
             hits = [ResultView(**hit) for hit in s.search(query)]
 
