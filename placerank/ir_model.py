@@ -20,7 +20,9 @@ This module contains the definition of a `IRModel`, aka a search engine stack:
 """
 from __future__ import annotations
 from abc import ABC, abstractmethod
+import math
 from enum import auto
+from operator import itemgetter
 from whoosh.scoring import WeightingModel
 from whoosh.index import Index
 from whoosh.scoring import BM25F
@@ -30,8 +32,6 @@ from typing import List, Tuple, Type
 
 from placerank.views import ResultView, QueryView, ReviewsIndex
 from placerank.query_expansion import QueryExpansionService
-import math
-from operator import itemgetter
 
 class IRModel(ABC):
     def __init__(
@@ -116,9 +116,9 @@ class SentimentRanker:
     def __get_sentiment_for(self, doc):
         return self.__reviews_index.get_sentiment_for(int(doc.id))
 
-    def rank(self, docs: List[ResultView], sentiment) -> List[ResultView]:
+    def rank(self, docs: List[ResultView], sentiment: str) -> List[ResultView]:
         sim_docs = map(lambda d: (d, self.__score(d, sentiment)), docs)
-        return list(map(itemgetter(0), sorted(sim_docs, key=itemgetter(1), reverse=True) ) )
+        return list(map(itemgetter(0), sorted(sim_docs, key=itemgetter(1), reverse=True)))
     
 
 if __name__ == "__main__":
