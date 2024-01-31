@@ -24,6 +24,7 @@ from enum import auto
 from whoosh.scoring import WeightingModel
 from whoosh.index import Index
 from whoosh.scoring import BM25F
+from whoosh.query import Term
 from whoosh import qparser
 from typing import List, Type
 
@@ -50,13 +51,16 @@ class IRModel(ABC):
     def set_autoexpansion(self, autoexpansion: bool):
         self._autoexpansion = autoexpansion
 
-    def search(self, query: QueryView) -> List[ResultView]:
+    def search(self, query: QueryView, **kwargs) -> List[ResultView]:
         expanded_query = self.query_expander.expand(query.textual_query)
+
+        parser = qparser.QueryParser('room_type', self.index.schema)
+        room_type = parser.parse(query.room_type) if query.room_type else None
 
         parser = self.get_query_parser(query)
         query = parser.parse(expanded_query if self._autoexpansion else query.textual_query)
         with self.index.searcher(weighting = self.weighting_model) as s:
-            hits = [ResultView(**hit) for hit in s.search(query)]
+            hits = [ResultView(**hit) for hit in s.search(query, filter = room_type, **kwargs)]
 
         return hits
 

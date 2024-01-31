@@ -33,7 +33,7 @@ class Presenter:
         self.open_result_request_observer = Observer(self.open_result_request, [Events.OPEN_RESULT_REQUEST.value])
     
     def search_query_update(self, event: Event, query: QueryView) -> None:
-        results = self._model.search(query)
+        results = self._model.search(query, limit = 20)
         
         if (cq := self._model.spell_corrector.correct(query)) != query.textual_query:
             Events.DID_YOU_MEAN.value.notify(cq)

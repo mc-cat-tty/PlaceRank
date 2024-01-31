@@ -40,13 +40,13 @@ class SearchBar(WidgetWrap):
 
         self.search_text_label = Text('Textual search: ')
         self.search_text_field = Edit(wrap = 'clip')
-        self.room_type_label = Text('Room type: ')
+        self.room_type_label = Text('Room-type filter: ')
         self.room_type_field = Edit(wrap = 'clip')
         self.sentiment_label = Text('Sentiment tags: ')
         self.sentiment_field = Edit(wrap = 'clip')
         self.search_text = Columns((
             ('pack', self.search_text_label),
-            ('weight', 75, LineBox(self.search_text_field, tline='', lline='', rline='')),
+            ('weight', 45, LineBox(self.search_text_field, tline='', lline='', rline='')),
             ('weight', 3, Divider()),
             ('pack', self.room_type_label),
             ('weight', 30, LineBox(self.room_type_field, tline='', lline='', rline='')),
