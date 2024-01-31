@@ -241,8 +241,8 @@ class Window(WidgetWrap):
         self.help_txt = help_txt
         self.main_description_txt = (
             '''Full-text search engine for AirBnB listings with support for sentiment tagging and contextual query expansion.\n'''
-            '''Try it yourself with queries like: "Manhattan apatment" (not the missing "r"), "Modern shared room near Cornell", "Row house by the Hudson"\n'''
-            '''Experiment with sentiment analysis by submitting queries like "long stay" with tags like "disappointment" and "disgust" (space-separated).\n'''
+            '''Try it yourself with queries like: "Manhattan apatment" (note the missing "r"), "Modern shared room near Cornell", "Row house by the Hudson"\n'''
+            '''Experiment with sentiment analysis by submitting queries like "long stay" with tags such as "disappointment" and "disgust" (space-separated).\n'''
             '''Check <Help> page for more details about the available classes.\n'''
         )
         self.current_page: int | self.Page = self.Page.MAIN
