@@ -1,5 +1,5 @@
 from sentimentModule.sentiment import GoEmotionsClassifier
-from placerank.views import InsideAirbnbSchema, DocumentView
+from placerank.views import InsideAirbnbSchema, DocumentView, ReviewView
 import placerank.config as config
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.index import create_in, Index
@@ -18,7 +18,7 @@ from itertools import islice
 from datetime import datetime
 import pydash
 import argparse
-from config import *
+from placerank.config import *
 
 def download_dataset(url: str, storage: io.StringIO) -> io.StringIO:
     """
@@ -145,7 +145,7 @@ def build_reviews_index(link: str = REVIEWS_URL):
     sent = GoEmotionsClassifier()
 
     with io.StringIO() as storage, open(config.REVIEWS_INDEX, "bw") as fp:
-        get_dataset(config.REVIEWS_DATASET_CACHE_FILE, link, storage)
+        get_dataset(config.REVIEWS_CACHE_FILE, link, storage)
 
         print("Downloaded dataset")
 
@@ -192,10 +192,11 @@ class ReviewsDatabase:
             with open(filename, "r") as fp:
                 reader = ReviewsDict(fp)
                 for row in reader:
-                    self.db[row.get("listing_id")].append((row.get("id"), row.get("date"), row.get("comments")))
+                    self.db[row.get("listing_id")].append(ReviewView.from_record(row))
 
             with open(config.REVIEWS_DB, "wb") as fp:
                 pickle.dump(self.db, fp)
+
 
 
 def main():
