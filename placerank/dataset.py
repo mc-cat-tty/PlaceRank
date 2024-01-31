@@ -188,6 +188,24 @@ def load_page(local_dataset: str, id: str) -> DocumentView:
         )
 
 
+class ReviewsDatabase:
+    def __init__(self, filename):
+        if ".pickle" in filename:
+            with open(filename, "rb") as fp:
+                self.db = pickle.load(fp)
+
+        else:
+            self.db = defaultdict(list)
+
+            with open(filename, "r") as fp:
+                reader = ReviewsDict(fp)
+                for row in reader:
+                    self.db[row.get("listing_id")].append((row.get("id"), row.get("date"), row.get("comments")))
+
+            with open(config.REVIEWS_DB, "wb") as fp:
+                pickle.dump(self.db, fp)
+
+
 def main():
     parser = argparse.ArgumentParser(
         prog = "Placerank dataset downloader and indexer",
