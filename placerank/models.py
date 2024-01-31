@@ -22,7 +22,7 @@ class SentimentAwareIRModel(IRModel):
         query_expander: QueryExpansionService,
         index: Index,
         sentiment_ranker: SentimentRanker,
-        weighting_model: WeightingModel = BM25F,
+        weighting_model: WeightingModel = BM25F
     ):
         super().__init__(spell_corrector, query_expander, index, weighting_model)
         self.sentiment_ranker = sentiment_ranker
@@ -38,6 +38,7 @@ class SentimentAwareIRModel(IRModel):
 
 class UnionIRModel(IRModel):
     def search(self, query: QueryView, **kwargs):
+        self.connector = 'OR'
         union_query = (
             pydash.chain(query.textual_query.split())
                 .intersperse(' OR ')
