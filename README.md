@@ -27,7 +27,14 @@ source venv/bin/activate
 ```
 
 ## Usage
+The Placerank project embraces different modules, each of them with a specific purpose, usually self-explanatory. The most significant ones are:
+ - `ir_model`, `models`, `sentiment` and `query_expansion` modules: contain some models and services that the user can experiment with through the following blocks
+ - `tui` package: contains view, presenter, event dispatcher and all the logic that is under the ui's hood
+ - `benchmark` module: contains the implementation of some popular benchmarking metrics
+ - `preprocessing`, `dataset`, `views`, `config` modules: contain the building blocks and convenience functions/classes for the entire project
+
 ### TUI
+The TUI - Terminal User Interface - is the front-end for our project. Launch the following command with a terminal window big enough:
 ```bash
 python3 -m placerank
 ```
@@ -36,8 +43,10 @@ In case of any doubt about the interface visit [help page](HELP.txt).
 
 Note that the application can take up to some seconds to load, especially at the first run.
 
-### Benchmarks
+#### Common Exceptions
+`urwid.widget.widget.WidgetError: ... canvas when passed size ...`. This class of errors usually means that the terminal **window** is **too small** for the TUI to be rendered.
 
+### Benchmarks
 The Benchmark module is designed to test the performance of an index against predefined queries. It includes functionality to load a benchmark dataset, test an index against the queries, and compute various evaluation metrics such as recall, precision, precision at ranking r, average precision, mean average precision, F1 score, and the E-measure.
 
 To use the Benchmark module, follow these steps:

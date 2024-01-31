@@ -1,17 +1,22 @@
 Overview
 ----------------
-Search engine for AirBnB listings.
+Search engine for AirBnB listings. Targeted on NYC's 80k listings.
 Final assignment of the "Gestione dell'informazione" course at University of Modena and Reggio Emilia. Academic year 2023-2024.
 
 How to move
 ----------------
-If you are lucky, your terminal provides mouse support: click and should work out-of-the-box, enabling you to interact with widgets though clicks.
+If you are lucky, your terminal provides mouse support: click and should work out-of-the-box, enabling you to interact with widgets though clicks. Scrolling unfortunatly, doesn't work; to scroll a list just use arrows as described below.
 
 Arrows (UP, DOWN, LEFT and RIGHT) move the cursor in a given direction.
-Tab moves the cursor from the search area to the bottom controls, when possible (eg. while reading this page no search area is available, so the focus can't be moved).
+TAB moves the cursor from the search area to the bottom controls, when possible (eg. while reading this page no search area is available, so the focus can't be moved).
+
+Room Type
+----------------
+Room type is an enumerated type, which values are pre-defined by AirBnb: private room, shared room, hotel room, entire home/apt. Make sure to write it precisely inside the filter field, since no autocompletion is provided.
 
 Sentiment Classes
 ----------------
-Submit queries with sentiment tags by juxtaposing them separated by a space.
+Sentiment analysis is made possible through a BERT multi-class classifier, trained on fine-grained, human annotated, GoEmotions dataset.
+Submit queries with sentiment tags by juxtaposing tags separated by a space.
 
-Available classes: admiration amusement amusement anger annoyance approval caring confusion curiosity desire disappointment disapproval disgust embarrassment excitement fear gratitude grief joy love nervousness optimism pride realization relief remorse sadness surprise neutral
+27 classes are available: admiration amusement amusement anger annoyance approval caring confusion curiosity desire disappointment disapproval disgust embarrassment excitement fear gratitude grief joy love nervousness optimism pride realization relief remorse sadness surprise neutral
