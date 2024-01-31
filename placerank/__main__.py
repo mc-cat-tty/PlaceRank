@@ -7,6 +7,7 @@ from placerank.models import *
 from placerank.dataset import ReviewsDatabase
 from placerank.config import INDEX_DIR, HELP_FILENAME, DATASET_CACHE_FILE, HF_CACHE, REVIEWS_DB, REVIEWS_INDEX
 from whoosh.index import open_dir
+from whoosh.scoring import TF_IDF, BM25F
 from urwid import MainLoop, ExitMainLoop
 import signal
 
@@ -22,7 +23,7 @@ def main() -> None:
     
     idx = open_dir(INDEX_DIR)
     model = IRModel(WhooshSpellCorrection, ThesaurusQueryExpansion(HF_CACHE), idx)
-    model = SentimentAwareIRModel(WhooshSpellCorrection, ThesaurusQueryExpansion(HF_CACHE), idx, SentimentRanker(REVIEWS_INDEX))
+    model = SentimentAwareIRModel(WhooshSpellCorrection, ThesaurusQueryExpansion(HF_CACHE), idx, SentimentRanker(REVIEWS_INDEX), TF_IDF)
     presenter = Presenter(model, DATASET_CACHE_FILE, ReviewsDatabase(REVIEWS_DB))
     loop = MainLoop(window, palette=PALETTE)
     loop.run()

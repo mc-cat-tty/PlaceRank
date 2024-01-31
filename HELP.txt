@@ -1,14 +1,17 @@
 Overview
 ----------------
-
 Search engine for AirBnB listings.
 Final assignment of the "Gestione dell'informazione" course at University of Modena and Reggio Emilia. Academic year 2023-2024.
 
-
 How to move
 ----------------
-
 If you are lucky, your terminal provides mouse support: click and should work out-of-the-box, enabling you to interact with widgets though clicks.
 
 Arrows (UP, DOWN, LEFT and RIGHT) move the cursor in a given direction.
 Tab moves the cursor from the search area to the bottom controls, when possible (eg. while reading this page no search area is available, so the focus can't be moved).
+
+Sentiment Classes
+----------------
+Submit queries with sentiment tags by juxtaposing them separated by a space.
+
+Available classes: admiration amusement amusement anger annoyance approval caring confusion curiosity desire disappointment disapproval disgust embarrassment excitement fear gratitude grief joy love nervousness optimism pride realization relief remorse sadness surprise neutral
