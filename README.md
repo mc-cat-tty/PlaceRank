@@ -34,6 +34,8 @@ python3 -m placerank
 
 In case of any doubt about the interface visit [help page](HELP.txt).
 
+Note that the application can take up to some seconds to load, especially at the first run.
+
 ### Benchmarks
 
 The Benchmark module is designed to test the performance of an index against predefined queries. It includes functionality to load a benchmark dataset, test an index against the queries, and compute various evaluation metrics such as recall, precision, precision at ranking r, average precision, mean average precision, F1 score, and the E-measure.

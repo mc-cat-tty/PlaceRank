@@ -168,8 +168,8 @@ index
 
 # Ignore big CSV files
 datasets/*.csv
+datasets/*reviews.pickle
 *cache*
 
-*reviews.pickle
 
 benchmark

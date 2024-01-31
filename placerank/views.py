@@ -55,8 +55,14 @@ class ReviewView(NamedTuple):
     """
     Adapter class to a review that instances an immutable tuple
     """
-    reviewer_name: str
+    id: int
+    date: str
     comments: str
+
+    @staticmethod
+    def from_record(record: dict) -> ReviewView:
+      return ReviewView(**{k: record[k] for k in ReviewView._fields})
+
 
 @verify(NAMED_FLAGS)
 class SearchFields(Flag):
@@ -89,7 +95,6 @@ class ResultView(NamedTuple):
 
 
 class ReviewsIndex:
-
     def __init__(self, path = "reviews.pickle"):
         with open("reviews.pickle", "rb") as fp:
             self.index = pickle.load(fp)

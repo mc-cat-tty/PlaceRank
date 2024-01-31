@@ -12,7 +12,7 @@ from __future__ import annotations
 from placerank.ir_model import IRModel
 from placerank.tui.events import Event, Events, Observer
 from placerank.views import QueryView, ResultView, ReviewView, DocumentView
-from placerank.dataset import load_page
+from placerank.dataset import ReviewsDatabase, load_page
 import re
 
 from whoosh.index import Index
@@ -27,9 +27,10 @@ class Presenter:
             cls.__instance = super().__new__(cls)
         return cls.__instance
 
-    def __init__(self, model: IRModel, local_dataset: str):
+    def __init__(self, model: IRModel, local_dataset: str, reviews_database: ReviewsDatabase):
         self._model = model
         self._local_dataset = local_dataset
+        self._reviews_database = reviews_database
         self._line_break_regex = re.compile(r'\s*<\s*br\s*/?>\s*')
         self.search_observser = Observer(self.search_query_update, [Events.SEARCH_QUERY_UPDATE.value])
         self.open_result_request_observer = Observer(self.open_result_request, [Events.OPEN_RESULT_REQUEST.value])
@@ -54,11 +55,12 @@ class Presenter:
         page = load_page(self._local_dataset, doc_id)
 
         cleaned_page = DocumentView(*(self._line_break_regex.sub('\n', field) if type(field) is str else field for field in page))
-
-        Events.OPEN_RESULT.value.notify(
-            cleaned_page,
-            [ReviewView(comments = 'comment', reviewer_name='pino'), ReviewView(comments = 'nice', reviewer_name = 'marco')]
-        )
+        cleaned_reviews = [
+            ReviewView(*(self._line_break_regex.sub('\n', field) if type(field) is str else field for field in review))
+            for review in self._reviews_database.db[int(doc_id)]
+        ]
+        
+        Events.OPEN_RESULT.value.notify(cleaned_page, cleaned_reviews)
 
     def autoexpansion_change(self, event: Event, state: bool) -> None:
         self._model.set_autoexpansion(state)
