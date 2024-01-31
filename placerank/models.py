@@ -106,8 +106,7 @@ class SentimentRanker:
         return num / (d_norm * q_norm)
     
     def __score(self, doc, sentiment):
-        return SentimentRanker.__cosine_similarity(self.__get_sentiment_for(doc), sentiment)# * doc.score
-        # TODO pass tfidf score in ResultView and uncomment the line above to include it in the equation
+        return SentimentRanker.__cosine_similarity(self.__get_sentiment_for(doc), sentiment) * doc.score
     
     def __get_sentiment_for(self, doc):
         return self.__reviews_index.get_sentiment_for(int(doc.id))
@@ -118,7 +117,7 @@ class SentimentRanker:
     
 
 if __name__ == "__main__":
-    results = [ResultView(470330, 0, 0), ResultView(267652, 0, 0), ResultView(321014, 0, 0)]
+    results = [ResultView(470330, 0, 0, 0.2), ResultView(267652, 0, 0, 0.9), ResultView(321014, 0, 0, 0.11)]
     sentiment = {'optimism': 1, 'approval': 1}
 
     a = SentimentRanker()
