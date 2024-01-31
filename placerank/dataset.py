@@ -1,5 +1,6 @@
 from sentimentModule.sentiment import GoEmotionsClassifier
 from placerank.views import InsideAirbnbSchema, DocumentView
+import placerank.config as config
 from whoosh.fields import Schema, TEXT, ID
 from whoosh.index import create_in, Index
 from whoosh.analysis import Analyzer
@@ -151,8 +152,8 @@ def build_reviews_index(link: str = REVIEWS_LINK):
 
     sent = GoEmotionsClassifier()
 
-    with open("reviews", "r+") as storage, open("reviews.pickle", "bw") as fp:
-        #download_dataset_source(storage, link)
+    with io.StringIO() as storage, open(config.REVIEWS_INDEX, "bw") as fp:
+        get_dataset(config.REVIEWS_DATASET_CACHE_FILE, link, storage)
 
         print("Downloaded dataset")
 
@@ -196,8 +197,12 @@ def main():
     parser.add_argument('-i', '--index-directory', required = True, help = 'Directory in which the index is created')
     parser.add_argument('-l', '---local-file', required = True, help = 'Path to local file. Download destination if dataset is not there, otherwise used as a local cache')
     parser.add_argument('-r', '--remote-url', help = 'Source URL from which the dataset is downloaded. Omit it if you want to use the local copy on your disk.')
+    parser.add_argument('-j', '--review-index', action = "store_true", help = 'Build the reviews index.')
     
     args = parser.parse_args(sys.argv[1:])  # Exclude module itself from arguments list
+
+    if args.review_index:
+        build_reviews_index(config.REVIEWS_URL)
 
     populate_index(args.index_directory, args.local_file, args.remote_url)
 

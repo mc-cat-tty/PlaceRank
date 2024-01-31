@@ -162,9 +162,14 @@ cython_debug/
 .vscode
 .DS_Store
 
+## Indices and datasets
 # Ignore Whoosh index
 index
 
 # Ignore big CSV files
 datasets/*.csv
 *cache*
+
+*reviews.pickle
+
+benchmark
