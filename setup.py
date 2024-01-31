@@ -5,6 +5,11 @@ from placerank import (
 )
 from placerank.config import *
 
+def setup_benchmark():
+    DATASET_URL = "http://data.insideairbnb.com/united-states/ma/cambridge/2023-12-26/data/listings.csv.gz"
+    REVIEWS_URL = "http://data.insideairbnb.com/united-states/ma/cambridge/2023-12-26/data/reviews.csv.gz"
+    dataset.populate_index(INDEX_DIR, DATASET_CACHE_FILE, DATASET_URL)
+    dataset.build_reviews_index(REVIEWS_URL)
 
 def main():
     preprocessing.setup()
@@ -20,4 +25,5 @@ def main():
     query_expansion.setup([HF_MODEL_MASKING, HF_MODEL_ENCODING], HF_CACHE)
 
 if __name__ == "__main__":
-    main()
+    #main()
+    setup_benchmark()

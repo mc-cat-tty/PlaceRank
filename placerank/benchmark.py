@@ -82,6 +82,8 @@ class Benchmark:
             )[0]) for q in self.__dset.queries
         ]
 
+        self.__results = [(q, [int(a.id) for a in answer]) for q, answer in self.__results]
+
         self.results = self.__results
         #TODO: remove self.results. Now permits inspection of the object without debugger
 
@@ -147,9 +149,10 @@ class Benchmark:
         """
         TODO: debug
         """
-        get_precisions = lambda x: [p for p, _ in zip(*x)]
+        get_precisions = lambda x: [p for p, _ in x]
 
-        return mean(get_precisions(self._compute_p_at_recall(relevant, answer)))
+        p_at_recall = self._compute_p_at_recall(relevant, answer)
+        return mean(get_precisions(p_at_recall))
     
     def average_precision(self):
         return [
@@ -166,9 +169,6 @@ class Benchmark:
             return 0
 
     def f1(self):
-        #precisions = filter(itemgetter(1), self.precision())   #can't figure out why it doesn't work
-        #recalls = filter(itemgetter(1), self.recall())
-
         precisions = [p[1] for p in self.precision()]
         recalls = [r[1] for r in self.recall()]
 
@@ -199,13 +199,14 @@ def main():
     
     bench.test_against(sentiment_model)
     
+    print("Model 1")
     for (query, results), (_q, precision), (__q, recall) in zip(bench.results, bench.precision(), bench.recall()):
-        print(f"{query.text} {results} p:{precision} r:{recall}")
+        print(f"\t{query.text} {results} p:{precision} r:{recall}")
 
     #print(bench.precision_at_r())
     #print(bench.precision_at_recall_levels())
-    #print(bench.average_precision())
-    #print(bench.f1())
+    print(*[f"\tF1 {q[0].text}: {score}" for q, score in bench.f1()], sep="\n")
+    print(f"\tMAP: {bench.mean_average_precision()}")
     #print(bench.e())
 
 if __name__ == "__main__":
