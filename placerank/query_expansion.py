@@ -48,7 +48,7 @@ class ThesaurusQueryExpansion(QueryExpansionService):
         return self.cos_sim(x, y)
 
     def _get_embedding(self, query: str):
-        tokens = self._tokenize(query)
+        tokens = self._tokenize('[CLS] ' + query + ' [SEP]')
         input_ids = self.tokenizer.convert_tokens_to_ids(tokens)
 
         input_ids = torch.tensor(input_ids).unsqueeze(0)
@@ -64,7 +64,7 @@ class ThesaurusQueryExpansion(QueryExpansionService):
         fmt = ' '.join(tmp)
         return fmt 
 
-    def expand(self, query: str, max_results: int = 5, confidence_threshold: float = 0) -> str:
+    def expand(self, query: str, max_results: int = 2, confidence_threshold: float = 0.9) -> str:
         tokens = self._tokenize(query)
         query_embedding = self._get_embedding(query)
         expanded_query = ""
@@ -77,6 +77,8 @@ class ThesaurusQueryExpansion(QueryExpansionService):
                     .flatten_deep()
                     .sorted_uniq()
                     .map(lambda c: c.replace('_', ' '))
+                    .filter(lambda c: c.lower() != token.lower())  # Filters out duplicates
+                    .filter(lambda c: wn.morphy(c.lower()) != wn.morphy(token.lower()))  # Filters out morphed version of the token
                     .value()
             )
 
@@ -97,10 +99,11 @@ class ThesaurusQueryExpansion(QueryExpansionService):
                     .take(max_results)
                     .value()
             )
-            
-            expanded_query += " " + ' '.join(expansions)
 
-        return expanded_query
+            # print(token, expansions)
+            expanded_query += " " + ' '.join(expansions + [token])
+
+        return expanded_query.strip()
 
 class LLMQueryExpansion(QueryExpansionService):
     """
@@ -125,7 +128,7 @@ class LLMQueryExpansion(QueryExpansionService):
         return self.cos_sim(x, y)
 
     def _get_embedding(self, query: str):
-        tokens = self._tokenize(query)
+        tokens = self._tokenize('[CLS] ' + query + ' [SEP]')
         input_ids = self.tokenizer.convert_tokens_to_ids(tokens)
 
         input_ids = torch.tensor(input_ids).unsqueeze(0)
@@ -147,7 +150,7 @@ class LLMQueryExpansion(QueryExpansionService):
         masked = ' '.join(tmp)
         return masked
 
-    def expand(self, query: str, max_results: int = 3, confidence_threshold: float = 0.9, overprediction: int = 5) -> str:
+    def expand(self, query: str, max_results: int = 2, confidence_threshold: float = 0.9, overprediction: int = 5) -> str:
         tokens = self._tokenize(query)
         query_embedding = self._get_embedding(query)
         expanded_query = ""
@@ -176,17 +179,17 @@ class LLMQueryExpansion(QueryExpansionService):
             
             expanded_query += " " + ' '.join(set(expansions + [token]))
 
-        return expanded_query
+        return expanded_query.strip()
 
 
 def main():
     qe_wn = ThesaurusQueryExpansion('hf_cache')
     qe_bert = LLMQueryExpansion('hf_cache')
 
-    query = 'modern shared room near Harvard.'
+    query = 'modern shared room near harvard'
     print(f'{query=}')
-    print(qe_wn.expand('modern shared room near Harvard.', 3, 0.9))
-    print(qe_bert.expand('modern shared room near Harvard.', 3, 0.9, 5))
+    print(qe_wn.expand(query, 2, 0.9))
+    print(qe_bert.expand(query, 2, 0.9, 5))
 
 if __name__ == '__main__':
     main()
