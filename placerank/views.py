@@ -102,7 +102,7 @@ class ReviewsIndex:
     def __todate(self, s: str):
         return datetime.strptime(s, "%Y-%m-%d")
 
-    def get_sentiment_for(self, key, lambda_mult = 1):
+    def get_sentiment_for(self, key, tau_div = 90):
         """
         Return the sentiment by exponential decay mean.
         """
@@ -115,7 +115,7 @@ class ReviewsIndex:
         reference_date = max([x for x in map(itemgetter(1), reviews)])
 
         def decay(date):
-            return math.e ** (- lambda_mult * ((reference_date - date).days))
+            return math.e ** (- ((reference_date - date).days) / tau_div)
         
         sentiment_vector = defaultdict(int)
 
