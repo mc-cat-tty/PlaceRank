@@ -1,7 +1,7 @@
 from __future__ import annotations
 import functools
 from urwid import *
-from placerank.views import SearchFields, ResultView, QueryView, DocumentView
+from placerank.views import SearchFields, ResultView, QueryView, DocumentView, ReviewView
 from placerank.tui.events import *
 from placerank.tui.presenter import *
 from enum import Enum, auto
@@ -295,13 +295,27 @@ class Window(WidgetWrap):
         self.current_page = self.Page.ADVANCED
         Events.MOVE_FOCUS_TO_SEARCH.value.unregister_observer(self.inner_container_focus_change)
 
-    def _open_result(self, event: Event, doc: DocumentView):
+    def _open_result(self, event: Event, doc: DocumentView, reviews: List[ReviewView]):
         if self.current_page == doc['id']: return
 
+        result_body = Pile(
+            (Text([('title', f'{key.upper()}: '), val]) for key, val in doc.items())
+        )
+
+
+        reviews_body = LineBox(
+            Pile(
+                (Text(r.comments) for r in reviews)
+            ),
+            title = 'REVIEWS',
+            title_attr = 'title'
+        )
+
+
         self.content_area.original_widget = Padding(
-            LineBox(Pile(
-                (Text([('title', f'{key.upper()}: '), val]) for key, val in doc.items())
-            )),
+            LineBox(
+                Pile((result_body, Divider(), reviews_body))
+            ),
             width = ('relative', 90), align = 'center'
         )
         self.current_page = 1

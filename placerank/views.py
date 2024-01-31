@@ -46,6 +46,12 @@ class DocumentView(NamedTuple):
     def from_record(record: dict) -> DocumentView:
       return {k: record[k] for k in DocumentView._fields}
 
+class ReviewView(NamedTuple):
+    """
+    Adapter class to a review that instances an immutable tuple
+    """
+    reviewer_name: str
+    comments: str
 
 @verify(NAMED_FLAGS)
 class SearchFields(Flag):

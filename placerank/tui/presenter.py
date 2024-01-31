@@ -11,7 +11,7 @@ model being injected as a dependency in it.
 from __future__ import annotations
 from placerank.ir_model import IRModel
 from placerank.tui.events import Event, Events, Observer
-from placerank.views import QueryView, ResultView
+from placerank.views import QueryView, ResultView, ReviewView
 from placerank.dataset import load_page
 
 from whoosh.index import Index
@@ -49,7 +49,10 @@ class Presenter:
         Events.SEARCH_RESULTS_UPDATE.value.notify(results)
 
     def open_result_request(self, event: Event, doc_id: int) -> None:
-        Events.OPEN_RESULT.value.notify(load_page(self._local_dataset, doc_id))
+        Events.OPEN_RESULT.value.notify(
+            load_page(self._local_dataset, doc_id),
+            [ReviewView(comments = 'comment', reviewer_name='pino'), ReviewView(comments = 'nice', reviewer_name = 'marco')]
+        )
 
     def autoexpansion_change(self, event: Event, state: bool) -> None:
         self._model.set_autoexpansion(state)

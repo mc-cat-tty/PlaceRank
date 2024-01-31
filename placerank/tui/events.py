@@ -54,7 +54,7 @@ class Events(Enum):
     AUTOEXPANSION_STATE_CHANGE = Event()  # Observer must listen for (event: Event, new_state: bool)
 
     OPEN_RESULT_REQUEST = Event()  # Observers must listen for (event: Event, doc_id: int)
-    OPEN_RESULT = Event()  # Observers must listern for (event: Event, document_view: DocumentView)
+    OPEN_RESULT = Event()  # Observers must listern for (event: Event, document_view: DocumentView, reviews: List[ReviewView])
 
     MOVE_FOCUS_TO_CONTROLS = Event()  # Self-explanatory. Listen for (event: Event,)
     MOVE_FOCUS_TO_SEARCH = Event()  # Self-explanatory. Listen for (event: Event,)
