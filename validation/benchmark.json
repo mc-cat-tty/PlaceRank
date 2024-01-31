@@ -17,7 +17,7 @@
         "uin": "A spacious house for a group of guys on holiday",
         "text": "house for group",
         "room_type": "Entire home/apt",
-        "sentiments": [],
+        "sentiments": ["confusion", "annoyance", "excitement", "neutral", "joy", "gratitude", "disappointment"],
         "relevant": [8758789, 949475573742371181, 6662157, 21012161, 1984737]
     },
     {
@@ -52,29 +52,29 @@
         "uin": "I'm looking for an apartment located in the east-Cambridge neighborhood, I can't wait to find an ideal location for my needs.",
         "text": "east-cambridge neighborhood",
         "room_type": "Entire home/apt",
-        "sentiments": ["excitement", "approval"],
-        "relevant": [50724014, 50724014, 1011434132378868116, 53981182, 15645066, 53981182, 38915459, 912260040502294810, 776129938479764291, 665964236829666436, 36795444, 3334098, 1022508266913236056, 14759578]
+        "sentiments": ["disappointment", "annoyance", "disapproval"],
+        "relevant": [1011434132378868116, 53981182, 38915459, 776129938479764291, 665964236829666436]
     },
     {
         "uin": "Private, quiet and clean studio or small apartment in ideal location",
         "text": "apartment or studio in mid-Cambridge",
         "room_type": "Entire home/apt",
-        "sentiments": ["admiration", "approval", "neutral"],
+        "sentiments": ["admiration", "approval", "neutral", "caring"],
         "relevant": [17285749, 9975650, 2320273, 23202737, 20671080, 20153407, 12231967, 6261046, 1018705929755251305]
     },
     {
         "uin": "I need a peaceful, private-room with private en suite ideally near the river.",
         "text": "private room by the river",
         "room_type": "Private room",
-        "sentiments": ["desire", "approval", "admiration", "neutral"],
-        "relevant": [976136745119302638, 939809139013928959, 939813177582086173, 984463752807910025, 939851762747637087, 939846250795981586, 15523233, 961661553888993640]
+        "sentiments": ["desire", "approval", "admiration", "neutral", "gratitude"],
+        "relevant": [976136745119302638, 939809139013928959, 939813177582086173, 984463752807910025, 939846250795981586, 15523233, 961661553888993640]
     },
     {
         "uin": "I'm in a hurry to find a dorm room for a student near MIT",
         "text": "room for students near MIT",
         "room_type": "Private room",
         "sentiments": ["annoyance", "neutral", "disapproval", "desire", "optimism"],
-        "relevant": [50171781, 50175808, 14212774, 14754163, 841777768042968655, 982717638805134477, 13203203, 15235520, 27498, 19581, 999462855395310148, 1893287, 28989060, 24888817, 1022340886777775581]
+        "relevant": [50171781, 50175808, 14212774, 14754163, 841777768042968655, 982717638805134477, 13203203, 15235520, 19581, 999462855395310148, 28989060, 24888817]
     }
 
 

@@ -1,4 +1,4 @@
-from sentimentModule.sentiment import GoEmotionsClassifier
+from placerank.sentiment import GoEmotionsClassifier
 from placerank.views import InsideAirbnbSchema, DocumentView
 import placerank.config as config
 from whoosh.fields import Schema, TEXT, ID
