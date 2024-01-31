@@ -76,7 +76,7 @@ class SearchBar(WidgetWrap):
         ))
 
         self.expansion_line =  Columns((
-            ('pack', Text('Try "')),
+            ('pack', Text('You may want to try "')),
             ('pack', self.expanded_suggestion),
             ('pack', Text('" to increase recall'))
         ))

@@ -50,6 +50,6 @@ class Presenter:
 
     def open_result_request(self, event: Event, doc_id: int) -> None:
         Events.OPEN_RESULT.value.notify(load_page(self._local_dataset, doc_id))
-    
+
     def autoexpansion_change(self, event: Event, state: bool) -> None:
         self._model.set_autoexpansion(state)

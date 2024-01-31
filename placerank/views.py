@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Dict, NamedTuple
+from typing import Dict, NamedTuple, Tuple
 from placerank.preprocessing import get_default_analyzer
 from whoosh.fields import FieldType, Schema, ID, TEXT, KEYWORD
 from enum import Flag, auto, verify, NAMED_FLAGS
@@ -40,6 +40,7 @@ class DocumentView(NamedTuple):
     room_type: str
     description: str
     neighborhood_overview: str
+    listing_url: str
 
     @staticmethod
     def from_record(record: dict) -> DocumentView:
