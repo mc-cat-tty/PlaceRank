@@ -64,7 +64,7 @@ class IRModel(ABC):
         with self.index.searcher(weighting = self.weighting_model) as s:
             hits = s.search(query, filter = room_type, **kwargs)
             tot = len(hits)
-            results = [ResultView(**hit) for hit in hits]
+            results = [ResultView(**dict(hit) | {"score": hit.score}) for hit in hits]
 
         return (results, tot)
 
