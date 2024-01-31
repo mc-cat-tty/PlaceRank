@@ -48,7 +48,7 @@ class Events(Enum):
     and can be retrieved with the following syntax: `Events.NAME.value`
     """
     SEARCH_QUERY_UPDATE = Event()  # Observers must listen for (event: Event, query_view: QueryView)
-    SEARCH_RESULTS_UPDATE = Event()  # Observers must listen for (event: Event, search_results: List[ResultView])
+    SEARCH_RESULTS_UPDATE = Event()  # Observers must listen for (event: Event, search_results: List[ResultView], total_res: int)
     DID_YOU_MEAN = Event()  # Observers must lister for (event: Event, suggestion: str)
     EXPANDED_ALTERNATIVE = Event()  # Observers must lister for (event: Event, suggestion: str)
     AUTOEXPANSION_STATE_CHANGE = Event()  # Observer must listen for (event: Event, new_state: bool)

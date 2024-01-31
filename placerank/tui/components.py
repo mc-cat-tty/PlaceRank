@@ -202,8 +202,8 @@ class SearchArea(WidgetWrap):
         if key != 'tab': return super().keypress(size, key)
         Events.MOVE_FOCUS_TO_CONTROLS.value.notify()
 
-    def _results_listener(self, event: Event, results: List[ResultView]) -> None:
-        self.result_area.set_title(f'Showing top {len(results)} results')
+    def _results_listener(self, event: Event, results: List[ResultView], total_res: int) -> None:
+        self.result_area.set_title(f'Showing top {len(results)} results. {total_res} total hits.')
         self.results.clear()
         self.results.extend(SimpleFocusListWalker(map(ResultCard, results)))
         self.results.set_focus(0)

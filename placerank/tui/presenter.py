@@ -36,7 +36,7 @@ class Presenter:
         self.autoexpansion_observer = Observer(self.autoexpansion_change, [Events.AUTOEXPANSION_STATE_CHANGE.value])
     
     def search_query_update(self, event: Event, query: QueryView) -> None:
-        results = self._model.search(query, limit = 50)
+        (results, tot_len) = self._model.search(query, limit = 50)
         
         if (cq := self._model.spell_corrector.correct(query)) != query.textual_query:
             Events.DID_YOU_MEAN.value.notify(cq)
@@ -48,7 +48,7 @@ class Presenter:
         else:
             Events.EXPANDED_ALTERNATIVE.value.notify(' ')
 
-        Events.SEARCH_RESULTS_UPDATE.value.notify(results)
+        Events.SEARCH_RESULTS_UPDATE.value.notify(results, tot_len)
 
     def open_result_request(self, event: Event, doc_id: int) -> None:
         page = load_page(self._local_dataset, doc_id)
