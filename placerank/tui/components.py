@@ -46,9 +46,9 @@ class SearchBar(WidgetWrap):
         self.sentiment_field = Edit(wrap = 'clip')
         self.search_text = Columns((
             ('pack', self.search_text_label),
-            ('weight', 45, LineBox(self.search_text_field, tline='', lline='', rline='')),
+            ('weight', 30, LineBox(self.search_text_field, tline='', lline='', rline='')),
             ('weight', 3, Divider()),
-            ('pack', self.room_type_label),
+            ('pack', Pile((self.room_type_label, Text('[Private|Shared|Hotel|Entire] ')))),
             ('weight', 30, LineBox(self.room_type_field, tline='', lline='', rline='')),
             ('weight', 3, Divider()),
             ('pack', self.sentiment_label),
