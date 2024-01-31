@@ -60,6 +60,7 @@ class IRModel(ABC):
 
         return hits
 
+
 class SpellCorrectionService(ABC):
     def __init__(self, ir_model: IRModel):
         self._ir_model = ir_model

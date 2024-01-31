@@ -9,7 +9,7 @@ From a practical point of view, `Presenter` is a singleton, of which the view is
 model being injected as a dependency in it. 
 """
 from __future__ import annotations
-from placerank.models import IRModel
+from placerank.ir_model import IRModel
 from placerank.tui.events import Event, Events, Observer
 from placerank.views import QueryView, ResultView
 from placerank.dataset import load_page

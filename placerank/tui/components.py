@@ -288,7 +288,6 @@ class Window(WidgetWrap):
         )
         self.current_page = 1
         self.inner_container.set_focus('footer')
-        self.controls.controls.set_focus(5)
         Events.MOVE_FOCUS_TO_SEARCH.value.unregister_observer(self.inner_container_focus_change)
 
     def _exit_callback(self, event: Event):

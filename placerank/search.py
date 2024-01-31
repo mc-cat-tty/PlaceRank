@@ -7,7 +7,7 @@ from whoosh.qparser import MultifieldParser
 from whoosh.index import Index
 from whoosh.scoring import TF_IDF, BM25F, FunctionWeighting, Frequency, WeightingModel, WeightScorer
 from typing import Set
-from placerank.models import RetrievalModel
+from placerank.ir_model import RetrievalModel
 
 class BinaryRetrievalModel:
     def __init__(self, index: Index)
