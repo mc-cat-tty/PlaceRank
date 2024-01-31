@@ -168,7 +168,7 @@ index
 
 # Ignore big CSV files
 datasets/*.csv
-datasets/*reviews.pickle
+datasets/*.pickle
 *cache*
 
 
