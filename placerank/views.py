@@ -70,7 +70,6 @@ class SearchFields(Flag):
     Enumeration of searchable fields
     """
     NAME = auto()
-    ROOM_TYPE = auto()
     DESCRIPTION = auto()
     NEIGHBORHOOD_OVERVIEW = auto()
 

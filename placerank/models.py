@@ -34,14 +34,15 @@ class SentimentAwareIRModel(IRModel):
 
 def main():
     idx = open_dir(INDEX_DIR)
-    model = SentimentAwareIRModel(NoSpellCorrection, NoQueryExpansion(), idx, SentimentRanker(REVIEWS_INDEX))
-    print(
-        model.search(QueryView(
+    sentiment_model = SentimentAwareIRModel(NoSpellCorrection, NoQueryExpansion(), idx, SentimentRanker(REVIEWS_INDEX))
+    sentiment_res = sentiment_model.search(
+        QueryView(
             textual_query = u'apartment in manhattan',
             sentiment_tags = 'joy',
             search_fields = SearchFields.DESCRIPTION | SearchFields.NEIGHBORHOOD_OVERVIEW | SearchFields.NAME
-        ))
-    )
+        )
+    )[1]
+    print(f"{sentiment_res=}")
 
 if __name__ == "__main__":
     main()
