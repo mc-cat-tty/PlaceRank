@@ -183,7 +183,7 @@ class Window(WidgetWrap):
         # STATE
         self.help_txt = help_txt
         self.main_description_txt = (
-            '''Full-text search engine for AirBnB listings with support for sentiment analysis and word2vec.\n'''
+            '''Full-text search engine for AirBnB listings with support for sentiment analysis.\n'''
             '''Try it yourself with queries like: "Manhattan apartment with amazing skyline view", "Row house nearby Brooklyn Bridge", "Cheap room in dangerous block"'''
         )
         self.current_page: int | self.Page = MAIN

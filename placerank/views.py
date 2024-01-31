@@ -78,6 +78,7 @@ class ResultView(NamedTuple):
     id: str
     name: str
     room_type: str
+    score: float
 
 
 class ReviewsIndex:

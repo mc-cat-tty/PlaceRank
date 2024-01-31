@@ -1,4 +1,4 @@
-from sentimentModule.sentiment import GoEmotionsClassifier
+from placerank.sentiment import GoEmotionsClassifier
 from placerank.views import InsideAirbnbSchema, DocumentView
 import placerank.config as config
 from whoosh.fields import Schema, TEXT, ID
@@ -186,6 +186,24 @@ def load_page(local_dataset: str, id: str) -> DocumentView:
                 .value()
                 .pop()
         )
+
+
+class ReviewsDatabase:
+    def __init__(self, filename):
+        if ".pickle" in filename:
+            with open(filename, "rb") as fp:
+                self.db = pickle.load(fp)
+
+        else:
+            self.db = defaultdict(list)
+
+            with open(filename, "r") as fp:
+                reader = ReviewsDict(fp)
+                for row in reader:
+                    self.db[row.get("listing_id")].append((row.get("id"), row.get("date"), row.get("comments")))
+
+            with open(config.REVIEWS_DB, "wb") as fp:
+                pickle.dump(self.db, fp)
 
 
 def main():
