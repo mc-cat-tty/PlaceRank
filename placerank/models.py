@@ -15,11 +15,11 @@ class SentimentAwareIRModel(IRModel):
         spell_corrector: Type[SpellCorrectionService],
         query_expander: QueryExpansionService,
         index: Index,
+        sentiment_ranker: SentimentRanker,
         weighting_model: WeightingModel = BM25F,
-        sentiment_ranker = SentimentRanker
     ):
         super().__init__(spell_corrector, query_expander, index, weighting_model)
-        self.sentiment = sentiment_ranker()
+        self.sentiment_ranker = sentiment_ranker
 
     def search(self, query: QueryView, **kwargs) -> Tuple[List[ResultView], int]:
         sentiment = {k: 1 for k in query.sentiment_tags.split(" ")}

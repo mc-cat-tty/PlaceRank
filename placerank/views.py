@@ -96,7 +96,7 @@ class ResultView(NamedTuple):
 
 class ReviewsIndex:
     def __init__(self, path = "reviews.pickle"):
-        with open("reviews.pickle", "rb") as fp:
+        with open(path, "rb") as fp:
             self.index = pickle.load(fp)
 
     def __todate(self, s: str):

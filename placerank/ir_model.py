@@ -92,8 +92,8 @@ class WhooshSpellCorrection(SpellCorrectionService):
         return corrected_query.string
         
 class SentimentRanker:
-    def __init__(self):
-        self.__reviews_index = ReviewsIndex()
+    def __init__(self, reviews_index_path: str):
+        self.__reviews_index = ReviewsIndex(reviews_index_path)
 
     @staticmethod
     def __cosine_similarity(doc: dict, query: dict):
@@ -105,8 +105,9 @@ class SentimentRanker:
         q_norm = math.sqrt(sum(v**2 for v in query.values()))
 
         num = sum(doc[k]*query[k] for k in (doc.keys() & query.keys()))
+        denom = (d_norm * q_norm)
 
-        return num / (d_norm * q_norm)
+        return num / denom if denom else 0
     
     def __score(self, doc, sentiment):
         return SentimentRanker.__cosine_similarity(self.__get_sentiment_for(doc), sentiment) * doc.score
