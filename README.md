@@ -5,6 +5,8 @@ Search engine for AirBnB listings.
 Final assignment of the "Gestione dell'informazione" course at University of Modena and Reggio Emilia. Academic year 2023-2024.
 
 ## Bringup
+At least version **3.11** of the **Python** interpreter is needed.
+
 In order to enjoy our not-so-SOTA search engine, the average user needs to run the following commands in a shell where the Python interpreter is available:
 ```bash
 # INSTALL DEPENDENCIES
