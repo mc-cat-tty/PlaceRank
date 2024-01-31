@@ -31,6 +31,7 @@ class Presenter:
         self._local_dataset = local_dataset
         self.search_observser = Observer(self.search_query_update, [Events.SEARCH_QUERY_UPDATE.value])
         self.open_result_request_observer = Observer(self.open_result_request, [Events.OPEN_RESULT_REQUEST.value])
+        self.autoexpansion_observer = Observer(self.autoexpansion_change, [Events.AUTOEXPANSION_STATE_CHANGE.value])
     
     def search_query_update(self, event: Event, query: QueryView) -> None:
         results = self._model.search(query, limit = 50)
@@ -49,3 +50,6 @@ class Presenter:
 
     def open_result_request(self, event: Event, doc_id: int) -> None:
         Events.OPEN_RESULT.value.notify(load_page(self._local_dataset, doc_id))
+    
+    def autoexpansion_change(self, event: Event, state: bool) -> None:
+        self._model.set_autoexpansion(state)

@@ -57,7 +57,7 @@ class SearchBar(WidgetWrap):
 
         self.search_fields_label = Text('Search fields: ')
         self.search_fields_checkboxes = Columns(self.checkboxes)
-        self.search_button = Button(('btn', 'Go'), on_press = lambda btn: self._search_listener())
+        self.search_button = Button(('btn', 'Go'), on_press = lambda _: self._search_listener())
         self.search_fields = Columns((
             ('pack', self.search_fields_label),
             ('weight', 75, self.search_fields_checkboxes),
@@ -87,6 +87,7 @@ class SearchBar(WidgetWrap):
         ))
 
         self.new_suggestion = Observer(self._update_suggestion, [Events.DID_YOU_MEAN.value, Events.EXPANDED_ALTERNATIVE.value])
+        connect_signal(self.autoexpansion, 'change', lambda _, state: self._autoexpansion_change(state))
 
         self.search_bar = Filler(
             ListBox((
@@ -104,6 +105,10 @@ class SearchBar(WidgetWrap):
 
 
         WidgetWrap.__init__(self, self.search_bar)
+
+    def _autoexpansion_change(self, state):
+        Events.AUTOEXPANSION_STATE_CHANGE.value.notify(state)
+        self._search_listener()
 
     def _update_suggestion(self, e: Event, suggestion: str):
         if e == Events.DID_YOU_MEAN.value:

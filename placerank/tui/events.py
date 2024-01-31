@@ -47,17 +47,18 @@ class Events(Enum):
     `Events` is the aggregator under which all the events are stored
     and can be retrieved with the following syntax: `Events.NAME.value`
     """
-    SEARCH_QUERY_UPDATE = Event()  # Observers must listen for (event, query_view)
-    SEARCH_RESULTS_UPDATE = Event()  # Observers must listen for (event, search_results)
-    DID_YOU_MEAN = Event()   # Observers must lister for (event, suggestion)
-    EXPANDED_ALTERNATIVE = Event()  # Observer must listen for (event, suggestion)
+    SEARCH_QUERY_UPDATE = Event()  # Observers must listen for (event: Event, query_view: QueryView)
+    SEARCH_RESULTS_UPDATE = Event()  # Observers must listen for (event: Event, search_results: List[ResultView])
+    DID_YOU_MEAN = Event()  # Observers must lister for (event: Event, suggestion: str)
+    EXPANDED_ALTERNATIVE = Event()  # Observers must lister for (event: Event, suggestion: str)
+    AUTOEXPANSION_STATE_CHANGE = Event()  # Observer must listen for (event: Event, new_state: bool)
 
-    OPEN_RESULT_REQUEST = Event()  # Observers must listen for (event, doc_id)
-    OPEN_RESULT = Event()  # Observers must listern for (event, document_view)
+    OPEN_RESULT_REQUEST = Event()  # Observers must listen for (event: Event, doc_id: int)
+    OPEN_RESULT = Event()  # Observers must listern for (event: Event, document_view: DocumentView)
 
-    MOVE_FOCUS_TO_CONTROLS = Event()  # Self-explanatory. Listen for (event,)
-    MOVE_FOCUS_TO_SEARCH = Event()  # Self-explanatory. Listen for (event,)
+    MOVE_FOCUS_TO_CONTROLS = Event()  # Self-explanatory. Listen for (event: Event,)
+    MOVE_FOCUS_TO_SEARCH = Event()  # Self-explanatory. Listen for (event: Event,)
     
-    ADVANCED_SCREEN = Event()  # Self-explanatory. Listen for (event,)
-    HELP_SCREEN = Event()  # Self-explanatory. Listen for (event,)
-    EXIT = Event()  # Self-explanatory. Listen for (event,)
+    ADVANCED_SCREEN = Event()  # Self-explanatory. Listen for (event: Event,)
+    HELP_SCREEN = Event()  # Self-explanatory. Listen for (event: Event,)
+    EXIT = Event()  # Self-explanatory. Listen for (event: Event,)
