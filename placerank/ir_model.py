@@ -101,8 +101,8 @@ class SentimentRanker:
         Cosine similarity
         """
         
-        d_norm = math.sqrt(sum(v for v in doc.values()))
-        q_norm = math.sqrt(sum(v for v in query.values()))
+        d_norm = math.sqrt(sum(v**2 for v in doc.values()))
+        q_norm = math.sqrt(sum(v**2 for v in query.values()))
 
         num = sum(doc[k]*query[k] for k in (doc.keys() & query.keys()))
 
