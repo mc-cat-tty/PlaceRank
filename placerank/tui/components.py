@@ -304,8 +304,8 @@ class Window(WidgetWrap):
 
 
         reviews_body = LineBox(
-            ListBox(
-                (Text(r.comments) for r in reviews)
+            Pile(
+                (Text([('title', r.date.strftime('%d/%m/%Y ')), r.comments]) for r in reviews[:3])
             ),
             title = 'REVIEWS',
             title_attr = 'title'
