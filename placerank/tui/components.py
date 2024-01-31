@@ -304,7 +304,7 @@ class Window(WidgetWrap):
 
 
         reviews_body = LineBox(
-            Pile(
+            ListBox(
                 (Text(r.comments) for r in reviews)
             ),
             title = 'REVIEWS',
