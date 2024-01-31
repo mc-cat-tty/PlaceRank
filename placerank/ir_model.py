@@ -94,6 +94,7 @@ class WhooshSpellCorrection(SpellCorrectionService):
 class SentimentRanker:
     def __init__(self, reviews_index_path: str):
         self.__reviews_index = ReviewsIndex(reviews_index_path)
+        self
 
     @staticmethod
     def __cosine_similarity(doc: dict, query: dict):

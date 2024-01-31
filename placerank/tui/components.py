@@ -161,7 +161,6 @@ class ResultCard(WidgetWrap):
                     (30, Text(str(result.id))),
                     Text(str(result.name)),
                     Text(str(result.room_type)),
-
                 )),
                 None, focus_map='reversed'
             ),
@@ -242,7 +241,7 @@ class Window(WidgetWrap):
         self.help_txt = help_txt
         self.main_description_txt = (
             '''Full-text search engine for AirBnB listings with support for sentiment tagging and contextual query expansion.\n'''
-            '''Try it yourself with queries like: "Manhattan apartment with amazing skyline view", "Row house nearby Brooklyn Bridge", "Cheap room in dangerous block"'''
+            '''Try it yourself with queries like: "Manhattan apatment" (not the missing "r"), "Modern shared room near Cornell", "Row house by the Hudson"'''
         )
         self.current_page: int | self.Page = self.Page.MAIN
 
@@ -302,15 +301,18 @@ class Window(WidgetWrap):
             (Text([('title', f'{key.upper()}: '), val]) for key, val in zip(doc._fields, doc))
         )
 
+        if reviews:
+            reviews_widget = Pile(
+                (Text([('title', r.date.strftime('%d/%m/%Y ')), r.comments[:1000]]) for r in reviews[:3])
+            )
+        else:
+            reviews_widget = Text('NO REVIEW')
 
         reviews_body = LineBox(
-            Pile(
-                (Text([('title', r.date.strftime('%d/%m/%Y ')), r.comments]) for r in reviews[:3])
-            ),
+            reviews_widget,
             title = 'REVIEWS',
             title_attr = 'title'
         )
-
 
         self.content_area.original_widget = Padding(
             LineBox(
