@@ -25,5 +25,5 @@ def main():
     query_expansion.setup([HF_MODEL_MASKING, HF_MODEL_ENCODING], HF_CACHE)
 
 if __name__ == "__main__":
-    #main()
-    setup_benchmark()
+    main()
+    # setup_benchmark()
