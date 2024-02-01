@@ -51,6 +51,11 @@ The Benchmark module is designed to test the performance of an index against pre
 
 To use the Benchmark module, follow these steps:
 
+Setup benchmarks:
+```python
+python3 -m setup_benchmarks
+```
+
 Create a Benchmark object:
 
 ```python
