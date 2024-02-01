@@ -67,7 +67,7 @@ class ThesaurusQueryExpansion(QueryExpansionService):
         fmt = ' '.join(tmp)
         return fmt 
 
-    def expand(self, query: str, max_results: int = 2, confidence_threshold: float = 0.9) -> str:
+    def expand(self, query: str, max_results: int = 2, confidence_threshold: float = 0.9, connector: str = 'AND') -> str:
         tokens = self._tokenize(query)
         query_embedding = self._get_embedding(query)
         expanded_query = []
@@ -115,7 +115,7 @@ class ThesaurusQueryExpansion(QueryExpansionService):
                             .value()
                 )
                 .map(lambda s: ['('] + s + [')'])
-                .intercalate('OR')
+                .intercalate(connector)
                 .value()
         )
         expanded_query = ' '.join(expanded_query)
@@ -166,7 +166,7 @@ class LLMQueryExpansion(QueryExpansionService):
         masked = ' '.join(tmp)
         return masked
 
-    def expand(self, query: str, max_results: int = 2, confidence_threshold: float = 0.9, overprediction: int = 5) -> str:
+    def expand(self, query: str, max_results: int = 2, confidence_threshold: float = 0.9, connector: str = 'AND', overprediction: int = 5) -> str:
         tokens = self._tokenize(query)
         query_embedding = self._get_embedding(query)
         expanded_query = []
@@ -205,7 +205,7 @@ class LLMQueryExpansion(QueryExpansionService):
                             .value()
                 )
                 .map(lambda s: ['('] + s + [')'])
-                .intercalate('OR')
+                .intercalate(connector)
                 .value()
         )
         expanded_query = ' '.join(expanded_query)

@@ -41,12 +41,14 @@ class IRModel(ABC):
         query_expander: QueryExpansionService,
         index: Index,
         weighting_model: WeightingModel = BM25F,
+        connector: str = 'AND'
     ):
         self.spell_corrector = spell_corrector(self)
         self.query_expander = query_expander
         self.index = index
         self.weighting_model = weighting_model
         self._autoexpansion = False
+        self.connector = connector
 
     def get_query_parser(self, query: QueryView) -> qparser.QueryParser:
         return qparser.MultifieldParser([i.name.lower() for i in query.search_fields], self.index.schema)
@@ -55,7 +57,7 @@ class IRModel(ABC):
         self._autoexpansion = autoexpansion
 
     def search(self, query: QueryView, **kwargs) -> Tuple(List[ResultView], int):
-        expanded_query = self.query_expander.expand(query.textual_query)
+        expanded_query = self.query_expander.expand(query.textual_query, connector = self.connector)
 
         parser = qparser.QueryParser('room_type', self.index.schema)
         parser.add_plugin(qparser.OperatorsPlugin())
