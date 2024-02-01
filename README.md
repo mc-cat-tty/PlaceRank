@@ -43,6 +43,9 @@ In case of any doubt about the interface visit [help page](HELP.txt).
 
 Note that the application can take up to some seconds to load, especially at the first run.
 
+<img src="assets/tui.png" width="200px">
+<img src="assets/tui2.png" width="200px">
+
 #### Common Exceptions
 `urwid.widget.widget.WidgetError: ... canvas when passed size ...`. This class of errors usually means that the terminal **window** is **too small** for the TUI to be rendered.
 
