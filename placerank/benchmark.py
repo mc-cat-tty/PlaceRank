@@ -5,6 +5,8 @@ Module to test performance of an index against predefined queries.
 from placerank.ir_model import *
 from placerank.models import *
 from placerank.config import *
+from placerank.query_expansion import *
+from whoosh.scoring import TF_IDF
 from whoosh.index import open_dir
 import json
 from operator import itemgetter
@@ -185,6 +187,19 @@ class Benchmark:
             (q, 1 - self._harmonic_mean(p, r, 1, b**2))
             for q, p, r in zip(self.__results, precisions, recalls)
         ]
+    
+    def mean_f1(self):
+        return mean([f1 for q, f1 in self.f1()])
+
+    def test_and_print(bench, model):
+        bench.test_against(model)
+        for (query, results), (_q, precision), (__q, recall) in zip(bench.__results, bench.precision(), bench.recall()):
+            print(f"\t{query.text} {len(results)} results p:{precision} r:{recall}")
+
+        print(*[f"\tF1 {q[0].text}: {score}" for q, score in bench.f1()], sep="\n")
+        print(f"\tF1 Mean: {bench.mean_f1()}")
+        print(f"\tMAP: {bench.mean_average_precision()}")
+        print()
 
 
 def main():
@@ -195,19 +210,60 @@ def main():
     bench = Benchmark()
 
     idx = open_dir(INDEX_DIR)
-    sentiment_model = SentimentAwareIRModel(NoSpellCorrection, NoQueryExpansion(), idx, SentimentRanker(REVIEWS_INDEX))
-    
-    bench.test_against(sentiment_model)
-    
-    print("Model 1")
-    for (query, results), (_q, precision), (__q, recall) in zip(bench.results, bench.precision(), bench.recall()):
-        print(f"\t{query.text} {results} p:{precision} r:{recall}")
+    base_model = IRModel(NoSpellCorrection, ThesaurusQueryExpansion(HF_CACHE), idx)
 
-    #print(bench.precision_at_r())
-    #print(bench.precision_at_recall_levels())
-    print(*[f"\tF1 {q[0].text}: {score}" for q, score in bench.f1()], sep="\n")
-    print(f"\tMAP: {bench.mean_average_precision()}")
-    #print(bench.e())
+    print("Model 1 - Base model (terms in AND)")
+    bench.test_and_print(base_model)
+
+
+    print("Model 2 - With query expansion")
+    base_model.set_autoexpansion(True)
+    bench.test_and_print(base_model)
+
+
+    print("Model 3 - OR terms model (overcoming of whoosh scoring)")
+    or_terms_model = UnionIRModel(NoSpellCorrection, ThesaurusQueryExpansion(HF_CACHE), idx, TF_IDF)
+    bench.test_and_print(or_terms_model)
+
+
+    print("Model 4 - OR terms model with query expansion")
+    or_terms_model.set_autoexpansion(True)
+    bench.test_and_print(or_terms_model)
+
+
+    print("Model 5 - OR terms model with LLM query expansion")
+    llm_expanded = UnionIRModel(NoSpellCorrection, LLMQueryExpansion(HF_CACHE), idx, TF_IDF)
+    llm_expanded.set_autoexpansion(True)
+    bench.test_and_print(llm_expanded)
+
+
+    print("Model 6 - OR terms model with BM25F")
+    or_terms_model = UnionIRModel(NoSpellCorrection, ThesaurusQueryExpansion(HF_CACHE), idx)
+    bench.test_and_print(or_terms_model)
+
+
+    print("Model 7 - OR terms model with BM25F and query expansion")
+    or_terms_model.set_autoexpansion(True)
+    bench.test_and_print(or_terms_model)
+
+
+    print("Model 8 - OR terms model with BM25F and LLM query expansion")
+    llm_expanded = UnionIRModel(NoSpellCorrection, LLMQueryExpansion(HF_CACHE), idx)
+    llm_expanded.set_autoexpansion(True)
+    bench.test_and_print(llm_expanded)
+
+
+    print("Model 9 - Sentiment Analysis")
+    sentiment_model = SentimentAwareIRModel(NoSpellCorrection, NoQueryExpansion(), idx, SentimentRanker(REVIEWS_INDEX))
+    bench.test_against(sentiment_model)
+    bench.test_and_print(sentiment_model)
+
+
+    print("Model 10 - Sentiment Analysis with wordnet query expansion")
+    sentiment_model = SentimentAwareIRModel(NoSpellCorrection, ThesaurusQueryExpansion(HF_CACHE), idx, SentimentRanker(REVIEWS_INDEX))
+    sentiment_model.set_autoexpansion(True)
+    bench.test_and_print(sentiment_model)
+
 
 if __name__ == "__main__":
     main()
