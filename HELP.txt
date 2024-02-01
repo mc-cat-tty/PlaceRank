@@ -1,6 +1,6 @@
 Overview
 ----------------
-Search engine for AirBnB listings. Targeted on NYC's 80k listings.
+Search engine for AirBnB listings. Targeted on NYC's 40k listings.
 Final assignment of the "Gestione dell'informazione" course at University of Modena and Reggio Emilia. Academic year 2023-2024.
 
 How to move
