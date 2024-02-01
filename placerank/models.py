@@ -15,7 +15,23 @@ from placerank.ir_model import IRModel, NoSpellCorrection, SentimentRanker, Spel
 from placerank.query_expansion import NoQueryExpansion, QueryExpansionService, ThesaurusQueryExpansion
 from placerank.config import HF_CACHE, INDEX_DIR, REVIEWS_INDEX
 
-class SentimentAwareIRModel(IRModel):
+class UnionIRModel(IRModel):
+    def search(self, query: QueryView, **kwargs):
+        union_query = (
+            pydash.chain(query.textual_query.split())
+                .intersperse(' OR ')
+                .value()
+        )
+        union_query = ' '.join(union_query)
+        query = QueryView(
+            union_query,
+            query.search_fields,
+            query.room_type,
+            query.sentiment_tags
+        )
+        return super().search(query, **kwargs)
+
+class SentimentAwareIRModel(UnionIRModel):
     def __init__(
         self,
         spell_corrector: Type[SpellCorrectionService],
@@ -35,22 +51,6 @@ class SentimentAwareIRModel(IRModel):
         sent_ranked_docs = self.sentiment_ranker.rank(docs, sentiment)[:limit]
 
         return (sent_ranked_docs, dlen)
-
-class UnionIRModel(IRModel):
-    def search(self, query: QueryView, **kwargs):
-        union_query = (
-            pydash.chain(query.textual_query.split())
-                .intersperse(' OR ')
-                .value()
-        )
-        union_query = ' '.join(union_query)
-        query = QueryView(
-            union_query,
-            query.search_fields,
-            query.room_type,
-            query.sentiment_tags
-        )
-        return super().search(query, **kwargs)
 
 def main():
     idx = open_dir(INDEX_DIR)
