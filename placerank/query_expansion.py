@@ -108,14 +108,15 @@ class ThesaurusQueryExpansion(QueryExpansionService):
 
         expanded_query = (
             pydash.chain(expanded_query)
-                .map(
-                    lambda sublist:
-                        pydash.chain(sublist)
-                            .intersperse('OR')
-                            .value()
-                )
-                .map(lambda s: ['('] + s + [')'])
-                .intercalate(connector)
+                # .map(
+                #     lambda sublist:
+                #         pydash.chain(sublist)
+                #             .intersperse('OR')
+                #             .value()
+                # )
+                # .map(lambda s: ['('] + s + [')'])
+                # .intercalate(connector)
+                .flatten_deep()
                 .value()
         )
         expanded_query = ' '.join(expanded_query)
@@ -198,14 +199,15 @@ class LLMQueryExpansion(QueryExpansionService):
         
         expanded_query = (
             pydash.chain(expanded_query)
-                .map(
-                    lambda sublist:
-                        pydash.chain(sublist)
-                            .intersperse('OR')
-                            .value()
-                )
-                .map(lambda s: ['('] + s + [')'])
-                .intercalate(connector)
+                # .map(
+                #     lambda sublist:
+                #         pydash.chain(sublist)
+                #             .intersperse('OR')
+                #             .value()
+                # )
+                # .map(lambda s: ['('] + s + [')'])
+                # .intercalate(connector)
+                .flatten_deep()
                 .value()
         )
         expanded_query = ' '.join(expanded_query)
