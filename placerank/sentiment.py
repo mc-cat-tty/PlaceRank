@@ -2,6 +2,8 @@ from transformers import BertTokenizer, AutoModelForSequenceClassification, pipe
 from whoosh.scoring import WeightingModel, BM25F
 from placerank.views import ReviewsIndex
 import math
+import re
+import pydash
 
 class GoEmotionsClassifier:
 
@@ -57,7 +59,14 @@ class BaseSentimentWeightingModel(BM25F):
         return textual_score * sentiment_score
 
     def set_user_sentiment(self, user_sentiment):
-        self.__user_sentiment = {k: 1 for k in user_sentiment.split(" ")}
+        negated_sentiments = (
+            pydash.chain(re.findall(r'\s*not\s+.+\s*', user_sentiment))
+            .map(lambda s: s.strip().split(' ')[1])
+            .value()
+        )
+
+        self.__user_sentiment = {k: 1 if k not in negated_sentiments else -1 for k in user_sentiment.split(" ")}
+        if 'not' in self.__user_sentiment: del self.__user_sentiment['not']
 
     def final(self, searcher, docnum, textual_score):
         textual_score = super().final(searcher, docnum, textual_score)
@@ -69,7 +78,7 @@ class BaseSentimentWeightingModel(BM25F):
         return self._combine_scores(textual_score, sentiment_score)
 
 
-# Example usage:
+
 if __name__ == "__main__":
     classifier = GoEmotionsClassifier()
     texts = ["it's happened before?! love my hometown of beautiful new ken 😂😂"]
