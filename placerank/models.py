@@ -2,35 +2,34 @@
 Cooked models ready to ship
 """
 
+from email.parser import Parser
 import pydash
 from whoosh.scoring import WeightingModel, BM25F
 from whoosh.index import Index, open_dir
 from whoosh.query import *
-from whoosh.qparser import QueryParser
+from whoosh.qparser import QueryParser, syntax
+from whoosh.qparser.plugins import MultifieldPlugin
 from typing import Type, Tuple, List
-from placerank import query_expansion
 
 from placerank.views import ResultView, QueryView, ReviewsIndex, SearchFields
 from placerank.ir_model import IRModel, NoSpellCorrection, SentimentRanker, SpellCorrectionService, WhooshSpellCorrection
 from placerank.query_expansion import NoQueryExpansion, QueryExpansionService, ThesaurusQueryExpansion
 from placerank.config import HF_CACHE, INDEX_DIR, REVIEWS_INDEX
 
+class MultifieldUnionPlugin(MultifieldPlugin):
+    def do_multifield(self, parser, group):
+        ast = super().do_multifield(parser, group)
+        lin_ast = [n for n in ast]
+        return syntax.OrGroup(lin_ast)
+
+
 class UnionIRModel(IRModel):
-    def search(self, query: QueryView, **kwargs):
-        self.connector = 'OR'
-        union_query = (
-            pydash.chain(query.textual_query.split())
-                .intersperse(' OR ')
-                .value()
-        )
-        union_query = ' '.join(union_query)
-        query = QueryView(
-            union_query,
-            query.search_fields,
-            query.room_type,
-            query.sentiment_tags
-        )
-        return super().search(query, **kwargs)
+    def get_query_parser(self, query: QueryView) -> QueryParser:
+        p = QueryParser(None, self.index.schema)
+        mfp = MultifieldUnionPlugin([f.name.lower() for f in query.search_fields])
+        p.add_plugin(mfp)
+        return p
+
 
 class SentimentAwareIRModel(UnionIRModel):
     def __init__(
@@ -64,9 +63,9 @@ def main():
         )
     )[1]
 
-    qe_model = IRModel(NoSpellCorrection, ThesaurusQueryExpansion(HF_CACHE), idx)
-    qe_model.set_autoexpansion(False)
-    qe_res = qe_model.search(
+    union_model = UnionIRModel(NoSpellCorrection, NoQueryExpansion(), idx)
+    union_model.set_autoexpansion(False)
+    qe_res = union_model.search(
         QueryView(
             textual_query = u'cheap stay',
             search_fields = SearchFields.DESCRIPTION | SearchFields.NEIGHBORHOOD_OVERVIEW | SearchFields.NAME

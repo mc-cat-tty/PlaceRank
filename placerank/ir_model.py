@@ -51,7 +51,7 @@ class IRModel(ABC):
         self.connector = connector
 
     def get_query_parser(self, query: QueryView) -> qparser.QueryParser:
-        return qparser.MultifieldParser([i.name.lower() for i in query.search_fields], self.index.schema)
+        return qparser.MultifieldParser([f.name.lower() for f in query.search_fields], self.index.schema)
     
     def set_autoexpansion(self, autoexpansion: bool):
         self._autoexpansion = autoexpansion
@@ -60,11 +60,11 @@ class IRModel(ABC):
         expanded_query = self.query_expander.expand(query.textual_query, connector = self.connector)
 
         parser = qparser.QueryParser('room_type', self.index.schema)
-        parser.add_plugin(qparser.OperatorsPlugin())
         room_type = parser.parse(query.room_type) if query.room_type else None
 
         parser = self.get_query_parser(query)
         query = parser.parse(expanded_query if self._autoexpansion else query.textual_query)
+
         with self.index.searcher(weighting = self.weighting_model) as s:
             hits = s.search(query, filter = room_type, **kwargs)
             tot = len(hits)
