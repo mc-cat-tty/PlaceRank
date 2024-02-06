@@ -2,19 +2,18 @@
 Cooked models ready to ship
 """
 
-from email.parser import Parser
-import pydash
-from whoosh.scoring import WeightingModel, BM25F
 from whoosh.index import Index, open_dir
 from whoosh.query import *
 from whoosh.qparser import QueryParser, syntax
 from whoosh.qparser.plugins import MultifieldPlugin
 from typing import Type, Tuple, List
 
-from placerank.views import ResultView, QueryView, ReviewsIndex, SearchFields
-from placerank.ir_model import IRModel, NoSpellCorrection, SentimentRanker, SpellCorrectionService, WhooshSpellCorrection
-from placerank.query_expansion import NoQueryExpansion, QueryExpansionService, ThesaurusQueryExpansion
+from placerank.views import *
+from placerank.ir_model import *
+from placerank.query_expansion import *
 from placerank.config import HF_CACHE, INDEX_DIR, REVIEWS_INDEX
+from placerank.sentiment import BaseSentimentWeightingModel
+
 
 class MultifieldUnionPlugin(MultifieldPlugin):
     def do_multifield(self, parser, group):
@@ -31,30 +30,10 @@ class UnionIRModel(IRModel):
         return p
 
 
-class SentimentAwareIRModel(UnionIRModel):
-    def __init__(
-        self,
-        spell_corrector: Type[SpellCorrectionService],
-        query_expander: QueryExpansionService,
-        index: Index,
-        sentiment_ranker: SentimentRanker,
-        weighting_model: WeightingModel = BM25F
-    ):
-        super().__init__(spell_corrector, query_expander, index, weighting_model)
-        self.sentiment_ranker = sentiment_ranker
-
-    def search(self, query: QueryView, **kwargs) -> Tuple[List[ResultView], int]:
-        sentiment = {k: 1 for k in query.sentiment_tags.split(" ")}
-        limit = kwargs.get('limit', None)
-        kwargs['limit'] = None
-        docs, dlen = super().search(query, **kwargs)
-        sent_ranked_docs = self.sentiment_ranker.rank(docs, sentiment)[:limit]
-
-        return (sent_ranked_docs, dlen)
 
 def main():
     idx = open_dir(INDEX_DIR)
-    sentiment_model = SentimentAwareIRModel(NoSpellCorrection, NoQueryExpansion(), idx, SentimentRanker(REVIEWS_INDEX))
+    sentiment_model = UnionIRModel(NoSpellCorrection, NoQueryExpansion(), idx, BaseSentimentWeightingModel(REVIEWS_INDEX))
     sentiment_res = sentiment_model.search(
         QueryView(
             textual_query = u'apartment in manhattan',  # Stopwords like 'in' are removed
@@ -62,6 +41,14 @@ def main():
             search_fields = SearchFields.DESCRIPTION | SearchFields.NEIGHBORHOOD_OVERVIEW | SearchFields.NAME
         )
     )[1]
+
+    for _ in sentiment_model.search(
+        QueryView(
+            textual_query = u'apartment in manhattan',  # Stopwords like 'in' are removed
+            sentiment_tags = 'joy',
+            search_fields = SearchFields.DESCRIPTION | SearchFields.NEIGHBORHOOD_OVERVIEW | SearchFields.NAME
+        )
+    )[0]: print(_)
 
     union_model = UnionIRModel(NoSpellCorrection, NoQueryExpansion(), idx)
     union_model.set_autoexpansion(False)
