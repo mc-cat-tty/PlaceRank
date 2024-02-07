@@ -32,11 +32,11 @@ class GoEmotionsClassifier:
 class BaseSentimentWeightingModel(BM25F):
     def __init__(self, reviews_index_path: str, *args, **kwargs):
         self.use_final = True
-        self.__user_sentiment = None
-        self.__reviews_index = ReviewsIndex(reviews_index_path)
+        self._user_sentiment = None
+        self._reviews_index = ReviewsIndex(reviews_index_path)
         super().__init__(*args, **kwargs)
     
-    def __cosine_similarity(self, doc: dict, query: dict):
+    def _cosine_similarity(self, doc: dict, query: dict):
         """
         Cosine similarity
         """
@@ -49,11 +49,11 @@ class BaseSentimentWeightingModel(BM25F):
 
         return num / denom if denom else 0
     
-    def __sentiment_score(self, listing_id, sentiment):
-        return self.__cosine_similarity(self.__get_sentiment_for(listing_id), sentiment)
+    def _sentiment_score(self, listing_id, sentiment):
+        return self._cosine_similarity(self._get_sentiment_for(listing_id), sentiment)
     
-    def __get_sentiment_for(self, listing_id):
-        return self.__reviews_index.get_sentiment_for(int(listing_id))
+    def _get_sentiment_for(self, listing_id):
+        return self._reviews_index.get_sentiment_for(int(listing_id))
 
     def _combine_scores(self, textual_score, sentiment_score):
         return textual_score * sentiment_score
@@ -66,19 +66,33 @@ class BaseSentimentWeightingModel(BM25F):
             .value()
         )
 
-        self.__user_sentiment = {k: 1 if k not in negated_sentiments else -1 for k in user_sentiment.split(" ")}
-        if 'not' in self.__user_sentiment: del self.__user_sentiment['not']
-        print(self.__user_sentiment)
+        self._user_sentiment = {k: 1 if k not in negated_sentiments else -1 for k in user_sentiment.split(" ")}
+        if 'not' in self._user_sentiment: del self._user_sentiment['not']
+
 
     def final(self, searcher, docnum, textual_score):
         textual_score = super().final(searcher, docnum, textual_score)
 
-        if not self.__user_sentiment: return textual_score
+        if not self._user_sentiment: return textual_score
 
         id = searcher.stored_fields(docnum)['id']
-        sentiment_score = self.__sentiment_score(id, self.__user_sentiment)
+        sentiment_score = self._sentiment_score(id, self._user_sentiment)
         return self._combine_scores(textual_score, sentiment_score)
 
+
+class AdvancedSentimentWeightingModel(BaseSentimentWeightingModel):
+    def combine_scores(self, textual_score, sentiment_score, id):
+        tmp = textual_score * sentiment_score * self._reviews_index.get_sentiment_len_for(id)
+        return tmp
+
+    def final(self, searcher, docnum, textual_score):
+        textual_score = super().final(searcher, docnum, textual_score)
+
+        if not self._user_sentiment: return textual_score
+
+        id = searcher.stored_fields(docnum)['id']
+        sentiment_score = self._sentiment_score(id, self._user_sentiment)
+        return self.combine_scores(textual_score, sentiment_score, id)
 
 
 if __name__ == "__main__":

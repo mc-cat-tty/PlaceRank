@@ -11,8 +11,8 @@ from typing import Type, Tuple, List
 from placerank.views import *
 from placerank.ir_model import *
 from placerank.query_expansion import *
+from placerank.sentiment import *
 from placerank.config import HF_CACHE, INDEX_DIR, REVIEWS_INDEX
-from placerank.sentiment import BaseSentimentWeightingModel
 
 
 class MultifieldUnionPlugin(MultifieldPlugin):
@@ -33,7 +33,7 @@ class UnionIRModel(IRModel):
 
 def main():
     idx = open_dir(INDEX_DIR)
-    sentiment_model = UnionIRModel(NoSpellCorrection, NoQueryExpansion(), idx, BaseSentimentWeightingModel(REVIEWS_INDEX))
+    sentiment_model = UnionIRModel(NoSpellCorrection, NoQueryExpansion(), idx, AdvancedSentimentWeightingModel(REVIEWS_INDEX))
     sentiment_res = sentiment_model.search(
         QueryView(
             textual_query = u'apartment in manhattan',  # Stopwords like 'in' are removed
@@ -41,14 +41,6 @@ def main():
             search_fields = SearchFields.DESCRIPTION | SearchFields.NEIGHBORHOOD_OVERVIEW | SearchFields.NAME
         )
     )[1]
-
-    for _ in sentiment_model.search(
-        QueryView(
-            textual_query = u'apartment in manhattan',  # Stopwords like 'in' are removed
-            sentiment_tags = 'joy',
-            search_fields = SearchFields.DESCRIPTION | SearchFields.NEIGHBORHOOD_OVERVIEW | SearchFields.NAME
-        )
-    )[0]: print(_)
 
     union_model = UnionIRModel(NoSpellCorrection, NoQueryExpansion(), idx)
     union_model.set_autoexpansion(False)
