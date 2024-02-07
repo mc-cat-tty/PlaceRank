@@ -59,14 +59,16 @@ class BaseSentimentWeightingModel(BM25F):
         return textual_score * sentiment_score
 
     def set_user_sentiment(self, user_sentiment):
+        user_sentiment = user_sentiment.strip() + ' '
         negated_sentiments = (
-            pydash.chain(re.findall(r'\s*not\s+.+\s*', user_sentiment))
+            pydash.chain(re.findall(r'\s*not\s+.+?\s+', user_sentiment))
             .map(lambda s: s.strip().split(' ')[1])
             .value()
         )
 
         self.__user_sentiment = {k: 1 if k not in negated_sentiments else -1 for k in user_sentiment.split(" ")}
         if 'not' in self.__user_sentiment: del self.__user_sentiment['not']
+        print(self.__user_sentiment)
 
     def final(self, searcher, docnum, textual_score):
         textual_score = super().final(searcher, docnum, textual_score)
