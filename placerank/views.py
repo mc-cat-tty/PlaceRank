@@ -100,6 +100,10 @@ class ReviewsIndex:
 
     def __todate(self, s: str):
         return datetime.strptime(s, "%Y-%m-%d")
+    
+    def get_sentiment_len_for(self, key):
+        tmp = self.index.get(int(key), {})
+        return len(tmp)
 
     def get_sentiment_for(self, key, tau_div = 90):
         """

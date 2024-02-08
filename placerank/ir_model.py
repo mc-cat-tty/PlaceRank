@@ -33,6 +33,8 @@ from typing import List, Tuple, Type
 
 from placerank.views import ResultView, QueryView, ReviewsIndex
 from placerank.query_expansion import QueryExpansionService
+from placerank.sentiment import BaseSentimentWeightingModel
+from placerank import config
 
 class IRModel(ABC):
     def __init__(
@@ -40,7 +42,7 @@ class IRModel(ABC):
         spell_corrector: Type[SpellCorrectionService],
         query_expander: QueryExpansionService,
         index: Index,
-        weighting_model: WeightingModel = BM25F,
+        weighting_model: WeightingModel = BM25F(),
         connector: str = 'AND'
     ):
         self.spell_corrector = spell_corrector(self)
@@ -51,20 +53,23 @@ class IRModel(ABC):
         self.connector = connector
 
     def get_query_parser(self, query: QueryView) -> qparser.QueryParser:
-        return qparser.MultifieldParser([i.name.lower() for i in query.search_fields], self.index.schema)
+        return qparser.MultifieldParser([f.name.lower() for f in query.search_fields], self.index.schema)
     
     def set_autoexpansion(self, autoexpansion: bool):
         self._autoexpansion = autoexpansion
 
     def search(self, query: QueryView, **kwargs) -> Tuple(List[ResultView], int):
+        if isinstance(self.weighting_model, BaseSentimentWeightingModel):
+            self.weighting_model.set_user_sentiment(query.sentiment_tags)
+
         expanded_query = self.query_expander.expand(query.textual_query, connector = self.connector)
 
         parser = qparser.QueryParser('room_type', self.index.schema)
-        parser.add_plugin(qparser.OperatorsPlugin())
         room_type = parser.parse(query.room_type) if query.room_type else None
 
         parser = self.get_query_parser(query)
         query = parser.parse(expanded_query if self._autoexpansion else query.textual_query)
+
         with self.index.searcher(weighting = self.weighting_model) as s:
             hits = s.search(query, filter = room_type, **kwargs)
             tot = len(hits)
@@ -95,41 +100,12 @@ class WhooshSpellCorrection(SpellCorrectionService):
 
         return corrected_query.string
         
-class SentimentRanker:
-    def __init__(self, reviews_index_path: str):
-        self.__reviews_index = ReviewsIndex(reviews_index_path)
-        self
 
-    @staticmethod
-    def __cosine_similarity(doc: dict, query: dict):
-        """
-        Cosine similarity
-        """
-        
-        d_norm = math.sqrt(sum(v**2 for v in doc.values()))
-        q_norm = math.sqrt(sum(v**2 for v in query.values()))
+# if __name__ == "__main__":
+#     results = [ResultView(470330, 0, 0, 0.2), ResultView(267652, 0, 0, 0.9), ResultView(321014, 0, 0, 0.11)]
+#     sentiment = {'optimism': 1, 'approval': 1}
 
-        num = sum(doc[k]*query[k] for k in (doc.keys() & query.keys()))
-        denom = (d_norm * q_norm)
-
-        return num / denom if denom else 0
-    
-    def __score(self, doc, sentiment):
-        return SentimentRanker.__cosine_similarity(self.__get_sentiment_for(doc), sentiment) * doc.score
-    
-    def __get_sentiment_for(self, doc):
-        return self.__reviews_index.get_sentiment_for(int(doc.id))
-
-    def rank(self, docs: List[ResultView], sentiment: str) -> List[ResultView]:
-        sim_docs = map(lambda d: (d, self.__score(d, sentiment)), docs)
-        return list(map(itemgetter(0), sorted(sim_docs, key=itemgetter(1), reverse=True)))
-    
-
-if __name__ == "__main__":
-    results = [ResultView(470330, 0, 0, 0.2), ResultView(267652, 0, 0, 0.9), ResultView(321014, 0, 0, 0.11)]
-    sentiment = {'optimism': 1, 'approval': 1}
-
-    a = SentimentRanker()
-    ranked = a.rank(results, sentiment)
-    for r in ranked:
-        print(r.id)
+#     a = SentimentRanker(config.REVIEWS_INDEX)
+#     ranked = a.rank(results, sentiment)
+#     for r in ranked:
+#         print(r.id)
